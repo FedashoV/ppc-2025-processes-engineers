@@ -6,7 +6,7 @@
 
 namespace tsyplakov_k_vec_neighbours {
 
-TsyplakovKVecNeighboursSEQ::TsyplakovKVecNeighboursSEQ(const InType& in) {
+TsyplakovKVecNeighboursSEQ::TsyplakovKVecNeighboursSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = std::make_tuple(-1, -1);

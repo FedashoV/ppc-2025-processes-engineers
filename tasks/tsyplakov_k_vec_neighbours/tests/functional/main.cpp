@@ -23,9 +23,9 @@ namespace tsyplakov_k_vec_neighbours {
 class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
   static std::string PrintTestParam(
-      const testing::TestParamInfo<std::tuple<std::function<std::shared_ptr<BaseTask>(InType)>, std::string, TestType>>&
-          info) {
-    const TestType& p = std::get<2>(info.param);
+      const testing::TestParamInfo<std::tuple<std::function<std::shared_ptr<BaseTask>(InType)>, std::string, TestType>>
+          &info) {
+    const TestType &p = std::get<2>(info.param);
     std::string task_type = std::get<1>(info.param);
     return task_type + "_" + std::to_string(std::get<0>(p)) + "_" + std::get<1>(p);
   }
@@ -69,7 +69,7 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
     expected_output_ = ComputeReference(input_data_);
   }
 
-  bool CheckTestOutputData(OutType& output_data) final {
+  bool CheckTestOutputData(OutType &output_data) final {
     return expected_output_ == output_data;
   }
 
@@ -78,7 +78,7 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
   }
 
  private:
-  static OutType ComputeReference(const std::vector<int>& v) {
+  static OutType ComputeReference(const std::vector<int> &v) {
     int best = std::numeric_limits<int>::max();
     int best_i = -1;
 

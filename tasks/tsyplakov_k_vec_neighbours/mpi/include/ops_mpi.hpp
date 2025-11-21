@@ -13,7 +13,7 @@ class TsyplakovKVecNeighboursMPI : public BaseTask {
     return ppc::task::TypeOfTask::kMPI;
   }
 
-  explicit TsyplakovKVecNeighboursMPI(const InType& in);
+  explicit TsyplakovKVecNeighboursMPI(const InType &in);
 
  private:
   bool ValidationImpl() override;
