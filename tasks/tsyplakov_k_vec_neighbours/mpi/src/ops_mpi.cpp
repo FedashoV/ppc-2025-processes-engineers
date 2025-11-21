@@ -19,7 +19,7 @@ struct Result {
   int index;
 };
 
-TsyplakovKVecNeighboursMPI::TsyplakovKVecNeighboursMPI(const InType& in) {
+TsyplakovKVecNeighboursMPI::TsyplakovKVecNeighboursMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = std::make_tuple(-1, -1);
@@ -39,7 +39,7 @@ bool TsyplakovKVecNeighboursMPI::ValidationImpl() {
 
 namespace {
 
-Result FindLocalMinimum(const std::vector<int>& vec, int local_start, int local_end) {
+Result FindLocalMinimum(const std::vector<int> &vec, int local_start, int local_end) {
   Result local_res{std::numeric_limits<int>::max(), -1};
 
   for (int i = local_start; i + 1 < local_end; ++i) {
@@ -52,7 +52,7 @@ Result FindLocalMinimum(const std::vector<int>& vec, int local_start, int local_
   return local_res;
 }
 
-void ExchangeBoundaryValues(int rank, int comm_size, int left_value, int right_value, int& recv_left, int& recv_right) {
+void ExchangeBoundaryValues(int rank, int comm_size, int left_value, int right_value, int &recv_left, int &recv_right) {
   std::array<MPI_Request, 4> reqs{MPI_REQUEST_NULL, MPI_REQUEST_NULL, MPI_REQUEST_NULL, MPI_REQUEST_NULL};
   int rc = 0;
 
@@ -70,7 +70,7 @@ void ExchangeBoundaryValues(int rank, int comm_size, int left_value, int right_v
 }
 
 void CheckBoundaryPairs(int rank, int comm_size, int left_value, int right_value, int recv_left, int recv_right,
-                        int local_start, int local_end, Result& local_res) {
+                        int local_start, int local_end, Result &local_res) {
   if (rank > 0) {
     long long diff = std::abs(static_cast<long long>(left_value) - static_cast<long long>(recv_left));
     int idx = local_start - 1;
@@ -92,7 +92,7 @@ void CheckBoundaryPairs(int rank, int comm_size, int left_value, int right_value
 }  // namespace
 
 bool TsyplakovKVecNeighboursMPI::RunImpl() {
-  const auto& vec = GetInput();
+  const auto &vec = GetInput();
   int rank = 0;
   int comm_size = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
