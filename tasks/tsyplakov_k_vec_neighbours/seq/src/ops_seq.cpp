@@ -28,9 +28,9 @@ bool TsyplakovKVecNeighboursSEQ::RunImpl() {
   int min_index = -1;
 
   for (size_t i = 0; i + 1 < vector_data_.size(); i++) {
-    int diff = std::abs(vector_data_[i] - vector_data_[i + 1]);
+    long long diff = std::abs(static_cast<long long>(vector_data_[i]) - static_cast<long long>(vector_data_[i + 1]));
     if (diff < min_diff) {
-      min_diff = diff;
+      min_diff = static_cast<int>(diff);
       min_index = static_cast<int>(i);
     }
   }

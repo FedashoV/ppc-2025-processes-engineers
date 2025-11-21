@@ -43,9 +43,9 @@ Result FindLocalMinimum(const std::vector<int>& vec, int local_start, int local_
   Result local_res{std::numeric_limits<int>::max(), -1};
 
   for (int i = local_start; i + 1 < local_end; ++i) {
-    int diff = std::abs(vec[i + 1] - vec[i]);
+    long long diff = std::abs(static_cast<long long>(vec[i + 1]) - static_cast<long long>(vec[i]));
     if (diff < local_res.delta || (diff == local_res.delta && i < local_res.index)) {
-      local_res.delta = diff;
+      local_res.delta = static_cast<int>(diff);
       local_res.index = i;
     }
   }
@@ -70,20 +70,20 @@ void ExchangeBoundaryValues(int rank, int comm_size, int left_value, int right_v
 }
 
 void CheckBoundaryPairs(int rank, int comm_size, int left_value, int right_value, int recv_left, int recv_right,
-                        int local_start, int local_end, Result& local_res, const std::vector<int>& vec) {
+                        int local_start, int local_end, Result& local_res) {
   if (rank > 0) {
-    int diff = std::abs(left_value - recv_left);
+    long long diff = std::abs(static_cast<long long>(left_value) - static_cast<long long>(recv_left));
     int idx = local_start - 1;
     if (diff < local_res.delta || (diff == local_res.delta && idx < local_res.index)) {
-      local_res.delta = diff;
+      local_res.delta = static_cast<int>(diff);
       local_res.index = idx;
     }
   }
   if (rank + 1 < comm_size) {
-    int diff = std::abs(right_value - recv_right);
+    long long diff = std::abs(static_cast<long long>(right_value) - static_cast<long long>(recv_right));
     int idx = local_end - 1;
     if (diff < local_res.delta || (diff == local_res.delta && idx < local_res.index)) {
-      local_res.delta = diff;
+      local_res.delta = static_cast<int>(diff);
       local_res.index = idx;
     }
   }
@@ -114,8 +114,8 @@ bool TsyplakovKVecNeighboursMPI::RunImpl() {
   int recv_right = 0;
 
   ExchangeBoundaryValues(rank, comm_size, left_value, right_value, recv_left, recv_right);
-  CheckBoundaryPairs(rank, comm_size, left_value, right_value, recv_left, recv_right, local_start, local_end, local_res,
-                     vec);
+  CheckBoundaryPairs(rank, comm_size, left_value, right_value, recv_left, recv_right, local_start, local_end,
+                     local_res);
 
   struct MpiResult {
     int delta;

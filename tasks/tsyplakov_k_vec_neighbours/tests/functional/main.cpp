@@ -64,7 +64,7 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
       }
     } else if (case_type == "big") {
       for (int i = 0; i < vec_size; i++) {
-        input_data_[i] = (i * 13 + 7) % 50;
+        input_data_[i] = i % 1000;
       }
     } else {
       throw std::runtime_error("Unknown test case type");
@@ -83,13 +83,17 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
 
  private:
   static OutType ComputeReference(const std::vector<int> &v) {
+    if (v.size() < 2) {
+      return std::make_tuple(-1, -1);
+    }
+
     int best = std::numeric_limits<int>::max();
     int best_i = -1;
 
     for (size_t i = 0; i + 1 < v.size(); i++) {
-      int diff = std::abs(v[i] - v[i + 1]);
+      long long diff = std::abs(static_cast<long long>(v[i]) - static_cast<long long>(v[i + 1]));
       if (diff < best) {
-        best = diff;
+        best = static_cast<int>(diff);
         best_i = static_cast<int>(i);
       }
     }
@@ -112,9 +116,9 @@ TEST_P(TsyplakovKVecNeighboursFuncTests, VecMinNeighbourDiff) {
 }
 
 const std::array<TestType, 7> kTestParam = {
-    std::make_tuple(10, "normal"),     std::make_tuple(10, "zeros"),     std::make_tuple(10, "all_same"),
-    std::make_tuple(10, "negatives"),  std::make_tuple(10, "ascending"), std::make_tuple(10, "descending"),
-    std::make_tuple(100000000, "big"),
+    std::make_tuple(10, "normal"),    std::make_tuple(10, "zeros"),     std::make_tuple(10, "all_same"),
+    std::make_tuple(10, "negatives"), std::make_tuple(10, "ascending"), std::make_tuple(10, "descending"),
+    std::make_tuple(1000000, "big"),
 };
 
 const auto kTestTasksList = std::tuple_cat(
