@@ -1,5 +1,10 @@
 #include <gtest/gtest.h>
 
+#include <cmath>
+#include <cstddef>
+#include <limits>
+#include <tuple>
+
 #include "tsyplakov_k_vec_neighbours/common/include/common.hpp"
 #include "tsyplakov_k_vec_neighbours/mpi/include/ops_mpi.hpp"
 #include "tsyplakov_k_vec_neighbours/seq/include/ops_seq.hpp"

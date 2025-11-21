@@ -21,7 +21,7 @@ class TsyplakovKVecNeighboursMPI : public BaseTask {
   bool RunImpl() override;
   bool PostProcessingImpl() override;
 
-  std::vector<int> local_vec;
+  std::vector<int> local_vec_;
 };
 
 }  // namespace tsyplakov_k_vec_neighbours

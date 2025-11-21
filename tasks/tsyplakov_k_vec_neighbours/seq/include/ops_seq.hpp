@@ -21,7 +21,7 @@ class TsyplakovKVecNeighboursSEQ : public BaseTask {
   bool RunImpl() override;
   bool PostProcessingImpl() override;
 
-  std::vector<int> vector_data;
+  std::vector<int> vector_data_;
 };
 
 }  // namespace tsyplakov_k_vec_neighbours

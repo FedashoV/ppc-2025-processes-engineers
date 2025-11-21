@@ -3,6 +3,7 @@
 #include <mpi.h>
 
 #include <algorithm>
+#include <array>
 #include <cstdlib>
 #include <limits>
 #include <tuple>
@@ -18,14 +19,14 @@ struct Result {
   int index;
 };
 
-TsyplakovKVecNeighboursMPI::TsyplakovKVecNeighboursMPI(const InType &in) {
+TsyplakovKVecNeighboursMPI::TsyplakovKVecNeighboursMPI(const InType& in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = std::make_tuple(-1, -1);
 }
 
 bool TsyplakovKVecNeighboursMPI::ValidationImpl() {
-  int rank;
+  int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   bool valid = true;
@@ -36,20 +37,9 @@ bool TsyplakovKVecNeighboursMPI::ValidationImpl() {
   return valid;
 }
 
-bool TsyplakovKVecNeighboursMPI::RunImpl() {
-  const auto &vec = GetInput();
-  int rank, comm_size;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+namespace {
 
-  int global_size = vec.size();
-  MPI_Bcast(&global_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-  int base = global_size / comm_size;
-  int rem = global_size % comm_size;
-  int local_start = rank * base + std::min(rank, rem);
-  int local_end = local_start + base + (rank < rem ? 1 : 0);
-
+Result FindLocalMinimum(const std::vector<int>& vec, int local_start, int local_end) {
   Result local_res{std::numeric_limits<int>::max(), -1};
 
   for (int i = local_start; i + 1 < local_end; ++i) {
@@ -59,12 +49,11 @@ bool TsyplakovKVecNeighboursMPI::RunImpl() {
       local_res.index = i;
     }
   }
+  return local_res;
+}
 
-  int left_value = (local_start > 0) ? vec[local_start] : 0;
-  int right_value = (local_end < global_size) ? vec[local_end - 1] : 0;
-  int recv_left = 0, recv_right = 0;
-
-  MPI_Request reqs[4] = {MPI_REQUEST_NULL, MPI_REQUEST_NULL, MPI_REQUEST_NULL, MPI_REQUEST_NULL};
+void ExchangeBoundaryValues(int rank, int comm_size, int left_value, int right_value, int& recv_left, int& recv_right) {
+  std::array<MPI_Request, 4> reqs{MPI_REQUEST_NULL, MPI_REQUEST_NULL, MPI_REQUEST_NULL, MPI_REQUEST_NULL};
   int rc = 0;
 
   if (rank > 0) {
@@ -76,9 +65,12 @@ bool TsyplakovKVecNeighboursMPI::RunImpl() {
     MPI_Isend(&right_value, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD, &reqs[rc++]);
   }
   if (rc > 0) {
-    MPI_Waitall(rc, reqs, MPI_STATUSES_IGNORE);
+    MPI_Waitall(rc, reqs.data(), MPI_STATUSES_IGNORE);
   }
+}
 
+void CheckBoundaryPairs(int rank, int comm_size, int left_value, int right_value, int recv_left, int recv_right,
+                        int local_start, int local_end, Result& local_res, const std::vector<int>& vec) {
   if (rank > 0) {
     int diff = std::abs(left_value - recv_left);
     int idx = local_start - 1;
@@ -95,11 +87,43 @@ bool TsyplakovKVecNeighboursMPI::RunImpl() {
       local_res.index = idx;
     }
   }
+}
 
-  struct {
+}  // namespace
+
+bool TsyplakovKVecNeighboursMPI::RunImpl() {
+  const auto& vec = GetInput();
+  int rank = 0;
+  int comm_size = 0;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+
+  int global_size = static_cast<int>(vec.size());
+  MPI_Bcast(&global_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+  const int base = global_size / comm_size;
+  const int rem = global_size % comm_size;
+  const int local_start = rank * base + std::min(rank, rem);
+  const int local_end = local_start + base + (rank < rem ? 1 : 0);
+
+  Result local_res = FindLocalMinimum(vec, local_start, local_end);
+
+  const int left_value = (local_start > 0) ? vec[local_start] : 0;
+  const int right_value = (local_end < global_size) ? vec[local_end - 1] : 0;
+  int recv_left = 0;
+  int recv_right = 0;
+
+  ExchangeBoundaryValues(rank, comm_size, left_value, right_value, recv_left, recv_right);
+  CheckBoundaryPairs(rank, comm_size, left_value, right_value, recv_left, recv_right, local_start, local_end, local_res,
+                     vec);
+
+  struct MpiResult {
     int delta;
     int index;
-  } send_res{local_res.delta, local_res.index}, recv_res;
+  };
+
+  MpiResult send_res{.delta = local_res.delta, .index = local_res.index};
+  MpiResult recv_res{};
 
   MPI_Allreduce(&send_res, &recv_res, 1, MPI_2INT, MPI_MINLOC, MPI_COMM_WORLD);
 
@@ -113,6 +137,7 @@ bool TsyplakovKVecNeighboursMPI::RunImpl() {
 bool TsyplakovKVecNeighboursMPI::PreProcessingImpl() {
   return true;
 }
+
 bool TsyplakovKVecNeighboursMPI::PostProcessingImpl() {
   return true;
 }

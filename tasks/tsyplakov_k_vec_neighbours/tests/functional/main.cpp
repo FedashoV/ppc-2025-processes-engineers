@@ -3,8 +3,12 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
+#include <limits>
+#include <memory>
 #include <numeric>
 #include <stdexcept>
 #include <string>
@@ -43,9 +47,9 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
         input_data_[i] = (i * 13 + 7) % 50;
       }
     } else if (case_type == "zeros") {
-      std::fill(input_data_.begin(), input_data_.end(), 0);
+      std::ranges::fill(input_data_, 0);
     } else if (case_type == "all_same") {
-      std::fill(input_data_.begin(), input_data_.end(), 42);
+      std::ranges::fill(input_data_, 42);
     } else if (case_type == "negatives") {
       for (int i = 0; i < vec_size; i++) {
         input_data_[i] = -i;
@@ -97,7 +101,7 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
     return std::make_tuple(-1, -1);
   }
 
-  InType input_data_;
+  InType input_data_{};
   OutType expected_output_ = std::make_tuple(-1, -1);
 };
 
