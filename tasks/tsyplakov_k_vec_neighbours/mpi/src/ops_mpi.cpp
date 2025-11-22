@@ -76,6 +76,19 @@ void ExchangeBoundaryValues(int rank, int comm_size, int left_value, int right_v
   }
 }
 
+bool CheckAndUpdateResult(int64_t diff, int global_idx, Result &local_res) {
+  if (diff < local_res.delta) {
+    local_res.delta = static_cast<int>(diff);
+    local_res.index = global_idx;
+    return true;
+  }
+  if (diff == local_res.delta && global_idx < local_res.index) {
+    local_res.index = global_idx;
+    return true;
+  }
+  return false;
+}
+
 }  // namespace
 
 bool TsyplakovKVecNeighboursMPI::PreProcessingImpl() {
@@ -125,7 +138,7 @@ bool TsyplakovKVecNeighboursMPI::RunImpl() {
 
   const int base = global_size / comm_size;
   const int rem = global_size % comm_size;
-  const int displ = (rank < rem) ? (rank * (base + 1)) : (rem * (base + 1) + (rank - rem) * base);
+  const int displ = (rank < rem) ? (rank * (base + 1)) : ((rem * (base + 1)) + ((rank - rem) * base));
 
   Result local_res = FindLocalMinimum(local_vec_, static_cast<int>(local_vec_.size()));
 
@@ -133,29 +146,27 @@ bool TsyplakovKVecNeighboursMPI::RunImpl() {
     local_res.index += displ;
   }
 
-  int left_value = (!local_vec_.empty()) ? local_vec_.front() : 0;
-  int right_value = (!local_vec_.empty()) ? local_vec_.back() : 0;
-  int recv_left = 0, recv_right = 0;
+  int left_value = 0;
+  int right_value = 0;
+  if (!local_vec_.empty()) {
+    left_value = local_vec_.front();
+    right_value = local_vec_.back();
+  }
 
+  int recv_left = 0;
+  int recv_right = 0;
   ExchangeBoundaryValues(rank, comm_size, left_value, right_value, recv_left, recv_right);
 
   if (rank > 0 && !local_vec_.empty()) {
     int64_t diff = std::llabs(static_cast<int64_t>(left_value) - static_cast<int64_t>(recv_left));
     int global_idx = displ - 1;
-
-    if (diff < local_res.delta || (diff == local_res.delta && global_idx < local_res.index)) {
-      local_res.delta = static_cast<int>(diff);
-      local_res.index = global_idx;
-    }
+    CheckAndUpdateResult(diff, global_idx, local_res);
   }
 
   if (rank + 1 < comm_size && !local_vec_.empty()) {
     int64_t diff = std::llabs(static_cast<int64_t>(recv_right) - static_cast<int64_t>(right_value));
-    int global_idx = displ + local_vec_.size() - 1;
-    if (diff < local_res.delta || (diff == local_res.delta && global_idx < local_res.index)) {
-      local_res.delta = static_cast<int>(diff);
-      local_res.index = global_idx;
-    }
+    int global_idx = displ + static_cast<int>(local_vec_.size()) - 1;
+    CheckAndUpdateResult(diff, global_idx, local_res);
   }
 
   struct MpiResult {
@@ -166,20 +177,23 @@ bool TsyplakovKVecNeighboursMPI::RunImpl() {
   MpiResult send_res{.delta = local_res.delta, .index = local_res.index};
   MpiResult recv_res{.delta = std::numeric_limits<int>::max(), .index = -1};
 
-  MPI_Datatype mpi_result_type;
-  int blocklengths[2] = {1, 1};
-  MPI_Aint displacements[2] = {0, sizeof(int)};
-  MPI_Datatype types[2] = {MPI_INT, MPI_INT};
-  MPI_Type_create_struct(2, blocklengths, displacements, types, &mpi_result_type);
+  MPI_Datatype mpi_result_type = MPI_DATATYPE_NULL;
+  std::array<int, 2> blocklengths = {1, 1};
+  std::array<MPI_Aint, 2> displacements = {0, sizeof(int)};
+  std::array<MPI_Datatype, 2> types = {MPI_INT, MPI_INT};
+
+  MPI_Type_create_struct(2, blocklengths.data(), displacements.data(), types.data(), &mpi_result_type);
   MPI_Type_commit(&mpi_result_type);
 
-  MPI_Op minloc_op;
+  MPI_Op minloc_op = MPI_OP_NULL;
   MPI_Op_create([](void *invec, void *inoutvec, int *len, MPI_Datatype * /*datatype*/) {
-    MpiResult *in = static_cast<MpiResult *>(invec);
-    MpiResult *inout = static_cast<MpiResult *>(inoutvec);
+    auto *in = static_cast<MpiResult *>(invec);
+    auto *inout = static_cast<MpiResult *>(inoutvec);
 
     for (int i = 0; i < *len; ++i) {
-      if (in[i].delta < inout[i].delta || (in[i].delta == inout[i].delta && in[i].index < inout[i].index)) {
+      if (in[i].delta < inout[i].delta) {
+        inout[i] = in[i];
+      } else if (in[i].delta == inout[i].delta && in[i].index < inout[i].index) {
         inout[i] = in[i];
       }
     }

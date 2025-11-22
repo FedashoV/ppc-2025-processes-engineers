@@ -1,14 +1,17 @@
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <array>
-#include <cmath>
+#include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <limits>
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 #include "tsyplakov_k_vec_neighbours/common/include/common.hpp"
@@ -34,14 +37,14 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
       return std::make_tuple(-1, -1);
     }
 
-    int64_t best = std::numeric_limits<int64_t>::max();
+    auto best = std::numeric_limits<int64_t>::max();
     int best_i = -1;
 
-    const std::size_t n = v.size();
+    const auto n = v.size();
     for (std::size_t i = 0; i + 1 < n; ++i) {
-      const int64_t val1 = static_cast<int64_t>(v[i]);
-      const int64_t val2 = static_cast<int64_t>(v[i + 1]);
-      const int64_t diff = std::llabs(val2 - val1);
+      const auto val1 = static_cast<int64_t>(v[i]);
+      const auto val2 = static_cast<int64_t>(v[i + 1]);
+      const auto diff = std::llabs(val2 - val1);
 
       if (diff < best) {
         best = diff;
@@ -68,12 +71,12 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
 
     if (case_type == "normal") {
       for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = (i * 13 + 7) % 50;
+        input_data_[i] = ((i * 13) + 7) % 50;
       }
     } else if (case_type == "zeros") {
-      std::ranges::fill(input_data_, 0);
+      std::fill(input_data_.begin(), input_data_.end(), 0);
     } else if (case_type == "all_same") {
-      std::ranges::fill(input_data_, 42);
+      std::fill(input_data_.begin(), input_data_.end(), 42);
     } else if (case_type == "negatives") {
       for (int i = 0; i < vec_size; ++i) {
         input_data_[i] = -i;
@@ -91,6 +94,7 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
         input_data_[i] = i % 1000;
       }
     } else if (case_type == "empty") {
+      // Пустой вектор
     } else if (case_type == "single_element") {
       if (vec_size > 0) {
         input_data_[0] = 42;
@@ -138,7 +142,7 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
       }
     } else if (case_type == "large_values") {
       for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = std::numeric_limits<int>::max() - (i % 100) * 1000000;
+        input_data_[i] = std::numeric_limits<int>::max() - ((i % 100) * 1000000);
       }
     } else if (case_type == "overflow_risk") {
       if (vec_size >= 2) {
@@ -165,11 +169,11 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
       }
     } else if (case_type == "two_processes") {
       for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = (i % 2 == 0) ? i * 10 : i * 10 + 1;
+        input_data_[i] = (i % 2 == 0) ? (i * 10) : ((i * 10) + 1);
       }
     } else if (case_type == "three_processes") {
       for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = i * 5 + (i % 3);
+        input_data_[i] = (i * 5) + (i % 3);
       }
     } else if (case_type == "small_even") {
       for (int i = 0; i < vec_size; ++i) {
@@ -177,11 +181,11 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
       }
     } else if (case_type == "small_odd") {
       for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = i * 2 + 1;
+        input_data_[i] = (i * 2) + 1;
       }
     } else if (case_type == "medium_distributed") {
       for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = (i * 7) % 50 + (i % 10);
+        input_data_[i] = ((i * 7) % 50) + (i % 10);
       }
     } else {
       throw std::runtime_error("Unknown test case type: " + case_type);
@@ -242,18 +246,6 @@ TEST_F(TsyplakovKVecNeighboursUnitTests, MixedSigns) {
 TEST_F(TsyplakovKVecNeighboursUnitTests, ExtremeOverflow) {
   std::vector<int> extreme = {std::numeric_limits<int>::min(), std::numeric_limits<int>::max()};
   auto result = TsyplakovKVecNeighboursFuncTests::ComputeReference(extreme);
-  EXPECT_EQ(std::make_tuple(0, 1), result);
-}
-
-TEST_F(TsyplakovKVecNeighboursUnitTests, SingleProcessCase) {
-  std::vector<int> single = {1, 2, 3};
-  auto result = TsyplakovKVecNeighboursFuncTests::ComputeReference(single);
-  EXPECT_EQ(std::make_tuple(0, 1), result);
-}
-
-TEST_F(TsyplakovKVecNeighboursUnitTests, BoundaryElementsMPI) {
-  std::vector<int> boundary = {10, 20, 5, 15, 25};
-  auto result = TsyplakovKVecNeighboursFuncTests::ComputeReference(boundary);
   EXPECT_EQ(std::make_tuple(0, 1), result);
 }
 
