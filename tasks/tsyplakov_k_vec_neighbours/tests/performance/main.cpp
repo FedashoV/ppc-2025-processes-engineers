@@ -30,7 +30,7 @@ class TsyplakovKVecNeighboursPerfTest : public ppc::util::BaseRunPerfTests<InTyp
     }
   }
 
-  bool CheckTestOutputData(OutType& output_data) final {
+  bool CheckTestOutputData(OutType &output_data) final {
 #ifdef USE_MPI
     int rank = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
