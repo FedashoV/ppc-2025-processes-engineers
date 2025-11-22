@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <compare>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -36,31 +37,31 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
   void SetUp() override {
     TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
 
-    const int vecSize = std::get<0>(params);
-    const std::string &caseType = std::get<1>(params);
+    const int vec_size = std::get<0>(params);
+    const std::string &case_type = std::get<1>(params);
 
-    input_data_.resize(vecSize);
+    input_data_.resize(vec_size);
 
-    if (caseType == "normal") {
-      for (int i = 0; i < vecSize; ++i) {
+    if (case_type == "normal") {
+      for (int i = 0; i < vec_size; ++i) {
         input_data_[i] = (i * 13 + 7) % 50;
       }
-    } else if (caseType == "zeros" || caseType == "all_same") {
-      std::ranges::fill(input_data_, (caseType == "zeros") ? 0 : 42);
-    } else if (caseType == "negatives") {
-      for (int i = 0; i < vecSize; ++i) {
+    } else if (case_type == "zeros" || case_type == "all_same") {
+      std::ranges::fill(input_data_, (case_type == "zeros") ? 0 : 42);
+    } else if (case_type == "negatives") {
+      for (int i = 0; i < vec_size; ++i) {
         input_data_[i] = -i;
       }
-    } else if (caseType == "ascending") {
-      for (int i = 0; i < vecSize; ++i) {
+    } else if (case_type == "ascending") {
+      for (int i = 0; i < vec_size; ++i) {
         input_data_[i] = i;
       }
-    } else if (caseType == "descending") {
-      for (int i = 0; i < vecSize; ++i) {
-        input_data_[i] = vecSize - i;
+    } else if (case_type == "descending") {
+      for (int i = 0; i < vec_size; ++i) {
+        input_data_[i] = vec_size - i;
       }
-    } else if (caseType == "big") {
-      for (int i = 0; i < vecSize; ++i) {
+    } else if (case_type == "big") {
+      for (int i = 0; i < vec_size; ++i) {
         input_data_[i] = i % 1000;
       }
     } else {

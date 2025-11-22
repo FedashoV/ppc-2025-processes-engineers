@@ -1,7 +1,9 @@
 #include "tsyplakov_k_vec_neighbours/seq/include/ops_seq.hpp"
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <limits>
 #include <tuple>
 #include <utility>
