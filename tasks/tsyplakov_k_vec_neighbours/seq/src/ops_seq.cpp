@@ -1,11 +1,13 @@
 #include "tsyplakov_k_vec_neighbours/seq/include/ops_seq.hpp"
 
 #include <cmath>
-#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <tuple>
+#include <utility>
 #include <vector>
+
+#include "tsyplakov_k_vec_neighbours/common/include/common.hpp"
 
 namespace tsyplakov_k_vec_neighbours {
 
@@ -31,9 +33,9 @@ bool TsyplakovKVecNeighboursSEQ::RunImpl() {
   const std::size_t n = vector_data_.size();
 
   for (std::size_t i = 0; i + 1 < n; ++i) {
-    int64_t diff = std::abs(static_cast<int64_t>(vector_data_[i + 1]) - static_cast<int64_t>(vector_data_[i]));
+    int64_t diff = std::llabs(static_cast<int64_t>(vector_data_[i + 1]) - static_cast<int64_t>(vector_data_[i]));
 
-    if (diff < min_diff || (diff == min_diff && static_cast<int>(i) < min_index)) {
+    if (diff < min_diff || (diff == min_diff && std::cmp_less(i, static_cast<std::size_t>(min_index)))) {
       min_diff = static_cast<int>(diff);
       min_index = static_cast<int>(i);
     }

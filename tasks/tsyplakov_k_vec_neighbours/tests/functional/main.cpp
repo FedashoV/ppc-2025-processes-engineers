@@ -2,16 +2,16 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <limits>
 #include <memory>
-#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <tuple>
-#include <utility>
 #include <vector>
 
 #include "tsyplakov_k_vec_neighbours/common/include/common.hpp"
@@ -36,31 +36,31 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
   void SetUp() override {
     TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
 
-    const int vec_size = std::get<0>(params);
-    const std::string &case_type = std::get<1>(params);
+    const int vecSize = std::get<0>(params);
+    const std::string &caseType = std::get<1>(params);
 
-    input_data_.resize(vec_size);
+    input_data_.resize(vecSize);
 
-    if (case_type == "normal") {
-      for (int i = 0; i < vec_size; ++i) {
+    if (caseType == "normal") {
+      for (int i = 0; i < vecSize; ++i) {
         input_data_[i] = (i * 13 + 7) % 50;
       }
-    } else if (case_type == "zeros" || case_type == "all_same") {
-      std::ranges::fill(input_data_, (case_type == "zeros") ? 0 : 42);
-    } else if (case_type == "negatives") {
-      for (int i = 0; i < vec_size; ++i) {
+    } else if (caseType == "zeros" || caseType == "all_same") {
+      std::ranges::fill(input_data_, (caseType == "zeros") ? 0 : 42);
+    } else if (caseType == "negatives") {
+      for (int i = 0; i < vecSize; ++i) {
         input_data_[i] = -i;
       }
-    } else if (case_type == "ascending") {
-      for (int i = 0; i < vec_size; ++i) {
+    } else if (caseType == "ascending") {
+      for (int i = 0; i < vecSize; ++i) {
         input_data_[i] = i;
       }
-    } else if (case_type == "descending") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = vec_size - i;
+    } else if (caseType == "descending") {
+      for (int i = 0; i < vecSize; ++i) {
+        input_data_[i] = vecSize - i;
       }
-    } else if (case_type == "big") {
-      for (int i = 0; i < vec_size; ++i) {
+    } else if (caseType == "big") {
+      for (int i = 0; i < vecSize; ++i) {
         input_data_[i] = i % 1000;
       }
     } else {
@@ -89,9 +89,8 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
 
     const std::size_t n = v.size();
     for (std::size_t i = 0; i + 1 < n; ++i) {
-      int64_t diff = std::abs(static_cast<int64_t>(v[i + 1]) - static_cast<int64_t>(v[i]));
-
-      if (diff < best || (diff == best && static_cast<int>(i) < best_i)) {
+      const int64_t diff = std::llabs(static_cast<int64_t>(v[i + 1]) - static_cast<int64_t>(v[i]));
+      if (diff < best || (diff == best && std::cmp_less(i, static_cast<std::size_t>(best_i)))) {
         best = static_cast<int>(diff);
         best_i = static_cast<int>(i);
       }
@@ -103,7 +102,7 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
     return std::make_tuple(-1, -1);
   }
 
-  InType input_data_{};
+  InType input_data_;
   OutType expected_output_ = std::make_tuple(-1, -1);
 };
 

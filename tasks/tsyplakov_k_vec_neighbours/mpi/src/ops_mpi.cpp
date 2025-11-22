@@ -2,9 +2,8 @@
 
 #include <mpi.h>
 
-#include <algorithm>
-#include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <limits>
 #include <tuple>
 #include <vector>
@@ -42,7 +41,7 @@ Result FindLocalMinimum(const std::vector<int> &vec, int local_start, int local_
   Result local_res{.delta = std::numeric_limits<int>::max(), .index = -1};
 
   for (int i = local_start; i + 1 < local_end; ++i) {
-    int64_t diff = std::abs(static_cast<int64_t>(vec[i + 1]) - static_cast<int64_t>(vec[i]));
+    int64_t diff = std::llabs(static_cast<int64_t>(vec[i + 1]) - static_cast<int64_t>(vec[i]));
     if (diff < local_res.delta || (diff == local_res.delta && i < local_res.index)) {
       local_res.delta = static_cast<int>(diff);
       local_res.index = i;
@@ -56,16 +55,12 @@ void ExchangeBoundaryValues(int rank, int comm_size, int left_value, int right_v
   int rc = 0;
 
   if (rank > 0) {
-    MPI_Irecv(&recv_left, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, &reqs[rc]);
-    rc++;
-    MPI_Isend(&left_value, 1, MPI_INT, rank - 1, 1, MPI_COMM_WORLD, &reqs[rc]);
-    rc++;
+    MPI_Irecv(&recv_left, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, &reqs[rc++]);
+    MPI_Isend(&left_value, 1, MPI_INT, rank - 1, 1, MPI_COMM_WORLD, &reqs[rc++]);
   }
   if (rank + 1 < comm_size) {
-    MPI_Irecv(&recv_right, 1, MPI_INT, rank + 1, 1, MPI_COMM_WORLD, &reqs[rc]);
-    rc++;
-    MPI_Isend(&right_value, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD, &reqs[rc]);
-    rc++;
+    MPI_Irecv(&recv_right, 1, MPI_INT, rank + 1, 1, MPI_COMM_WORLD, &reqs[rc++]);
+    MPI_Isend(&right_value, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD, &reqs[rc++]);
   }
 
   if (rc > 0) {
@@ -76,7 +71,7 @@ void ExchangeBoundaryValues(int rank, int comm_size, int left_value, int right_v
 void CheckBoundaryPairs(int rank, int comm_size, int left_value, int right_value, int recv_left, int recv_right,
                         int local_start, int local_end, Result &local_res) {
   if (rank > 0) {
-    int64_t diff = std::abs(static_cast<int64_t>(left_value) - static_cast<int64_t>(recv_left));
+    int64_t diff = std::llabs(static_cast<int64_t>(left_value) - static_cast<int64_t>(recv_left));
     int idx = local_start - 1;
     if (diff < local_res.delta || (diff == local_res.delta && idx < local_res.index)) {
       local_res.delta = static_cast<int>(diff);
@@ -84,7 +79,7 @@ void CheckBoundaryPairs(int rank, int comm_size, int left_value, int right_value
     }
   }
   if (rank + 1 < comm_size) {
-    int64_t diff = std::abs(static_cast<int64_t>(right_value) - static_cast<int64_t>(recv_right));
+    int64_t diff = std::llabs(static_cast<int64_t>(right_value) - static_cast<int64_t>(recv_right));
     int idx = local_end - 1;
     if (diff < local_res.delta || (diff == local_res.delta && idx < local_res.index)) {
       local_res.delta = static_cast<int>(diff);

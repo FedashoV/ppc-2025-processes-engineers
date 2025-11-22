@@ -1,11 +1,10 @@
 #include <gtest/gtest.h>
 
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <limits>
 #include <tuple>
-#include <vector>
 
 #include "tsyplakov_k_vec_neighbours/common/include/common.hpp"
 #include "tsyplakov_k_vec_neighbours/mpi/include/ops_mpi.hpp"
@@ -19,14 +18,14 @@
 namespace tsyplakov_k_vec_neighbours {
 
 class TsyplakovKVecNeighboursPerfTest : public ppc::util::BaseRunPerfTests<InType, OutType> {
- private:
-  static constexpr int kCount_ = 75'000'000;
-  InType input_data_{};
+ protected:
+  static constexpr int kCount = 75000000;
+  InType input_data;
 
   void SetUp() override {
-    input_data_.resize(kCount_);
-    for (int i = 0; i < kCount_; ++i) {
-      input_data_[i] = i;
+    input_data.resize(kCount);
+    for (int i = 0; i < kCount; ++i) {
+      input_data[i] = i;
     }
   }
 
@@ -35,38 +34,32 @@ class TsyplakovKVecNeighboursPerfTest : public ppc::util::BaseRunPerfTests<InTyp
     int rank = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     if (rank != 0) {
-      // На не-нулевых рангах результата нет, возвращаем true.
       return true;
     }
 #endif
 
-    if (input_data_.size() < 2) {
+    if (input_data.size() < 2) {
       return output_data == std::make_tuple(-1, -1);
     }
 
     int best = std::numeric_limits<int>::max();
     int best_i = -1;
 
-    const std::size_t n = input_data_.size();
-
+    const std::size_t n = input_data.size();
     for (std::size_t i = 0; i + 1 < n; ++i) {
-      int64_t diff64 = std::abs(static_cast<int64_t>(input_data_[i + 1]) - static_cast<int64_t>(input_data_[i]));
-
-      int diff = static_cast<int>(diff64);
-
-      if (diff < best || (diff == best && static_cast<int>(i) < best_i)) {
-        best = diff;
+      const int64_t diff = std::llabs(static_cast<int64_t>(input_data[i + 1]) - static_cast<int64_t>(input_data[i]));
+      if (diff < best || (diff == best && std::cmp_less(i, static_cast<std::size_t>(best_i)))) {
+        best = static_cast<int>(diff);
         best_i = static_cast<int>(i);
       }
     }
 
-    OutType expected = (best_i >= 0) ? std::make_tuple(best_i, best_i + 1) : std::make_tuple(-1, -1);
-
+    const OutType expected = (best_i >= 0) ? std::make_tuple(best_i, best_i + 1) : std::make_tuple(-1, -1);
     return output_data == expected;
   }
 
   InType GetTestInputData() final {
-    return input_data_;
+    return input_data;
   }
 };
 
