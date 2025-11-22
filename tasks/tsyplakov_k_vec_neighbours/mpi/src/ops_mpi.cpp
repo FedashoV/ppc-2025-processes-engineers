@@ -3,6 +3,7 @@
 #include <mpi.h>
 
 #include <cstdint>
+#include <cstdlib>
 #include <limits>
 #include <tuple>
 #include <vector>
@@ -124,7 +125,7 @@ bool TsyplakovKVecNeighboursMPI::RunImpl() {
 
   const int base = global_size / comm_size;
   const int rem = global_size % comm_size;
-  const int displ = (rank * base) + std::min(rank, rem);
+  const int displ = (rank < rem) ? (rank * (base + 1)) : (rem * (base + 1) + (rank - rem) * base);
 
   Result local_res = FindLocalMinimum(local_vec_, static_cast<int>(local_vec_.size()));
 
@@ -138,10 +139,19 @@ bool TsyplakovKVecNeighboursMPI::RunImpl() {
 
   ExchangeBoundaryValues(rank, comm_size, left_value, right_value, recv_left, recv_right);
 
-  if (rank > 0 && recv_left != 0 && !local_vec_.empty()) {
+  if (rank > 0 && !local_vec_.empty()) {
     int64_t diff = std::llabs(static_cast<int64_t>(left_value) - static_cast<int64_t>(recv_left));
     int global_idx = displ - 1;
 
+    if (diff < local_res.delta || (diff == local_res.delta && global_idx < local_res.index)) {
+      local_res.delta = static_cast<int>(diff);
+      local_res.index = global_idx;
+    }
+  }
+
+  if (rank + 1 < comm_size && !local_vec_.empty()) {
+    int64_t diff = std::llabs(static_cast<int64_t>(recv_right) - static_cast<int64_t>(right_value));
+    int global_idx = displ + local_vec_.size() - 1;
     if (diff < local_res.delta || (diff == local_res.delta && global_idx < local_res.index)) {
       local_res.delta = static_cast<int>(diff);
       local_res.index = global_idx;

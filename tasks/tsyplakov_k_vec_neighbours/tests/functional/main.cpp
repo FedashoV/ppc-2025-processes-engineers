@@ -156,6 +156,33 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
       for (int i = 0; i < vec_size; ++i) {
         input_data_[i] = (i % 2 == 0) ? 100 : 101;
       }
+    } else if (case_type == "single_process") {
+      if (vec_size > 0) {
+        input_data_[0] = 10;
+        if (vec_size > 1) {
+          input_data_[1] = 11;
+        }
+      }
+    } else if (case_type == "two_processes") {
+      for (int i = 0; i < vec_size; ++i) {
+        input_data_[i] = (i % 2 == 0) ? i * 10 : i * 10 + 1;
+      }
+    } else if (case_type == "three_processes") {
+      for (int i = 0; i < vec_size; ++i) {
+        input_data_[i] = i * 5 + (i % 3);
+      }
+    } else if (case_type == "small_even") {
+      for (int i = 0; i < vec_size; ++i) {
+        input_data_[i] = i * 2;
+      }
+    } else if (case_type == "small_odd") {
+      for (int i = 0; i < vec_size; ++i) {
+        input_data_[i] = i * 2 + 1;
+      }
+    } else if (case_type == "medium_distributed") {
+      for (int i = 0; i < vec_size; ++i) {
+        input_data_[i] = (i * 7) % 50 + (i % 10);
+      }
     } else {
       throw std::runtime_error("Unknown test case type: " + case_type);
     }
@@ -218,16 +245,46 @@ TEST_F(TsyplakovKVecNeighboursUnitTests, ExtremeOverflow) {
   EXPECT_EQ(std::make_tuple(0, 1), result);
 }
 
-const std::array<TestType, 22> kTestParam = {
-    std::make_tuple(10, "normal"),          std::make_tuple(10, "zeros"),          std::make_tuple(10, "all_same"),
-    std::make_tuple(10, "negatives"),       std::make_tuple(10, "ascending"),      std::make_tuple(10, "descending"),
-    std::make_tuple(1000000, "big"),        std::make_tuple(0, "empty"),           std::make_tuple(1, "single_element"),
-    std::make_tuple(2, "minimal"),          std::make_tuple(3, "small"),           std::make_tuple(100, "medium"),
-    std::make_tuple(10, "first_pair_best"), std::make_tuple(10, "last_pair_best"), std::make_tuple(10, "multiple_same"),
-    std::make_tuple(10, "large_values"),    std::make_tuple(10, "overflow_risk"),  std::make_tuple(10, "mixed_signs"),
-    std::make_tuple(10, "alternating"),     std::make_tuple(500, "normal"),        std::make_tuple(1000, "ascending"),
-    std::make_tuple(1000, "descending"),
-};
+TEST_F(TsyplakovKVecNeighboursUnitTests, SingleProcessCase) {
+  std::vector<int> single = {1, 2, 3};
+  auto result = TsyplakovKVecNeighboursFuncTests::ComputeReference(single);
+  EXPECT_EQ(std::make_tuple(0, 1), result);
+}
+
+TEST_F(TsyplakovKVecNeighboursUnitTests, BoundaryElementsMPI) {
+  std::vector<int> boundary = {10, 20, 5, 15, 25};
+  auto result = TsyplakovKVecNeighboursFuncTests::ComputeReference(boundary);
+  EXPECT_EQ(std::make_tuple(0, 1), result);
+}
+
+const std::array<TestType, 28> kTestParam = {std::make_tuple(10, "normal"),
+                                             std::make_tuple(10, "zeros"),
+                                             std::make_tuple(10, "all_same"),
+                                             std::make_tuple(10, "negatives"),
+                                             std::make_tuple(10, "ascending"),
+                                             std::make_tuple(10, "descending"),
+                                             std::make_tuple(1000000, "big"),
+                                             std::make_tuple(0, "empty"),
+                                             std::make_tuple(1, "single_element"),
+                                             std::make_tuple(2, "minimal"),
+                                             std::make_tuple(3, "small"),
+                                             std::make_tuple(100, "medium"),
+                                             std::make_tuple(10, "first_pair_best"),
+                                             std::make_tuple(10, "last_pair_best"),
+                                             std::make_tuple(10, "multiple_same"),
+                                             std::make_tuple(10, "large_values"),
+                                             std::make_tuple(10, "overflow_risk"),
+                                             std::make_tuple(10, "mixed_signs"),
+                                             std::make_tuple(10, "alternating"),
+                                             std::make_tuple(500, "normal"),
+                                             std::make_tuple(1000, "ascending"),
+                                             std::make_tuple(1000, "descending"),
+                                             std::make_tuple(1, "single_process"),
+                                             std::make_tuple(2, "two_processes"),
+                                             std::make_tuple(3, "three_processes"),
+                                             std::make_tuple(4, "small_even"),
+                                             std::make_tuple(5, "small_odd"),
+                                             std::make_tuple(100, "medium_distributed")};
 
 const auto kTestTasksList = std::tuple_cat(
     ppc::util::AddFuncTask<TsyplakovKVecNeighboursMPI, InType>(kTestParam, PPC_SETTINGS_tsyplakov_k_vec_neighbours),
