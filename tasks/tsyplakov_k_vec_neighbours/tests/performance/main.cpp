@@ -2,8 +2,10 @@
 
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <tuple>
+#include <vector>
 
 #include "tsyplakov_k_vec_neighbours/common/include/common.hpp"
 #include "tsyplakov_k_vec_neighbours/mpi/include/ops_mpi.hpp"
@@ -17,21 +19,23 @@
 namespace tsyplakov_k_vec_neighbours {
 
 class TsyplakovKVecNeighboursPerfTest : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  const int kCount_ = 75000000;
+ private:
+  static constexpr int kCount_ = 75'000'000;
   InType input_data_{};
 
   void SetUp() override {
     input_data_.resize(kCount_);
-    for (int i = 0; i < kCount_; i++) {
+    for (int i = 0; i < kCount_; ++i) {
       input_data_[i] = i;
     }
   }
 
-  bool CheckTestOutputData(OutType &output_data) final {
+  bool CheckTestOutputData(OutType& output_data) final {
 #ifdef USE_MPI
     int rank = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     if (rank != 0) {
+      // На не-нулевых рангах результата нет, возвращаем true.
       return true;
     }
 #endif
@@ -43,9 +47,14 @@ class TsyplakovKVecNeighboursPerfTest : public ppc::util::BaseRunPerfTests<InTyp
     int best = std::numeric_limits<int>::max();
     int best_i = -1;
 
-    for (size_t i = 0; i + 1 < input_data_.size(); i++) {
-      int diff = std::abs(input_data_[i] - input_data_[i + 1]);
-      if (diff < best) {
+    const std::size_t n = input_data_.size();
+
+    for (std::size_t i = 0; i + 1 < n; ++i) {
+      int64_t diff64 = std::abs(static_cast<int64_t>(input_data_[i + 1]) - static_cast<int64_t>(input_data_[i]));
+
+      int diff = static_cast<int>(diff64);
+
+      if (diff < best || (diff == best && static_cast<int>(i) < best_i)) {
         best = diff;
         best_i = static_cast<int>(i);
       }

@@ -1,9 +1,7 @@
 #include <gtest/gtest.h>
-#include <stb/stb_image.h>
 
 #include <algorithm>
 #include <array>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -27,43 +25,42 @@ namespace tsyplakov_k_vec_neighbours {
 class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
   static std::string PrintTestParam(
-      const testing::TestParamInfo<std::tuple<std::function<std::shared_ptr<BaseTask>(InType)>, std::string, TestType>>
-          &info) {
-    const TestType &p = std::get<2>(info.param);
-    std::string task_type = std::get<1>(info.param);
+      const testing::TestParamInfo<std::tuple<std::function<std::shared_ptr<BaseTask>(InType)>, std::string, TestType>>&
+          info) {
+    const TestType& p = std::get<2>(info.param);
+    const std::string& task_type = std::get<1>(info.param);
     return task_type + "_" + std::to_string(std::get<0>(p)) + "_" + std::get<1>(p);
   }
 
  protected:
   void SetUp() override {
     TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-    int vec_size = std::get<0>(params);
-    std::string case_type = std::get<1>(params);
+
+    const int vec_size = std::get<0>(params);
+    const std::string& case_type = std::get<1>(params);
 
     input_data_.resize(vec_size);
 
     if (case_type == "normal") {
-      for (int i = 0; i < vec_size; i++) {
+      for (int i = 0; i < vec_size; ++i) {
         input_data_[i] = (i * 13 + 7) % 50;
       }
-    } else if (case_type == "zeros") {
-      std::ranges::fill(input_data_, 0);
-    } else if (case_type == "all_same") {
-      std::ranges::fill(input_data_, 42);
+    } else if (case_type == "zeros" || case_type == "all_same") {
+      std::ranges::fill(input_data_, (case_type == "zeros") ? 0 : 42);
     } else if (case_type == "negatives") {
-      for (int i = 0; i < vec_size; i++) {
+      for (int i = 0; i < vec_size; ++i) {
         input_data_[i] = -i;
       }
     } else if (case_type == "ascending") {
-      for (int i = 0; i < vec_size; i++) {
+      for (int i = 0; i < vec_size; ++i) {
         input_data_[i] = i;
       }
     } else if (case_type == "descending") {
-      for (int i = 0; i < vec_size; i++) {
+      for (int i = 0; i < vec_size; ++i) {
         input_data_[i] = vec_size - i;
       }
     } else if (case_type == "big") {
-      for (int i = 0; i < vec_size; i++) {
+      for (int i = 0; i < vec_size; ++i) {
         input_data_[i] = i % 1000;
       }
     } else {
@@ -73,7 +70,7 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
     expected_output_ = ComputeReference(input_data_);
   }
 
-  bool CheckTestOutputData(OutType &output_data) final {
+  bool CheckTestOutputData(OutType& output_data) final {
     return expected_output_ == output_data;
   }
 
@@ -82,7 +79,7 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
   }
 
  private:
-  static OutType ComputeReference(const std::vector<int> &v) {
+  static OutType ComputeReference(const std::vector<int>& v) {
     if (v.size() < 2) {
       return std::make_tuple(-1, -1);
     }
@@ -90,9 +87,11 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
     int best = std::numeric_limits<int>::max();
     int best_i = -1;
 
-    for (size_t i = 0; i + 1 < v.size(); i++) {
-      long long diff = std::abs(static_cast<long long>(v[i]) - static_cast<long long>(v[i + 1]));
-      if (diff < best) {
+    const std::size_t n = v.size();
+    for (std::size_t i = 0; i + 1 < n; ++i) {
+      int64_t diff = std::abs(static_cast<int64_t>(v[i + 1]) - static_cast<int64_t>(v[i]));
+
+      if (diff < best || (diff == best && static_cast<int>(i) < best_i)) {
         best = static_cast<int>(diff);
         best_i = static_cast<int>(i);
       }
@@ -101,7 +100,6 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
     if (best_i >= 0) {
       return std::make_tuple(best_i, best_i + 1);
     }
-
     return std::make_tuple(-1, -1);
   }
 
