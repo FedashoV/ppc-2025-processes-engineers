@@ -1,12 +1,9 @@
 #include "tsyplakov_k_vec_neighbours/seq/include/ops_seq.hpp"
 
 #include <cmath>
-#include <cstddef>
 #include <cstdint>
-#include <cstdlib>
 #include <limits>
 #include <tuple>
-#include <utility>
 #include <vector>
 
 #include "tsyplakov_k_vec_neighbours/common/include/common.hpp"
@@ -20,7 +17,7 @@ TsyplakovKVecNeighboursSEQ::TsyplakovKVecNeighboursSEQ(const InType &in) {
 }
 
 bool TsyplakovKVecNeighboursSEQ::ValidationImpl() {
-  return GetInput().size() >= 2;
+  return true;
 }
 
 bool TsyplakovKVecNeighboursSEQ::PreProcessingImpl() {
@@ -29,10 +26,15 @@ bool TsyplakovKVecNeighboursSEQ::PreProcessingImpl() {
 }
 
 bool TsyplakovKVecNeighboursSEQ::RunImpl() {
+  const std::size_t n = vector_data_.size();
+
+  if (n < 2) {
+    GetOutput() = std::make_tuple(-1, -1);
+    return true;
+  }
+
   int min_diff = std::numeric_limits<int>::max();
   int min_index = -1;
-
-  const std::size_t n = vector_data_.size();
 
   for (std::size_t i = 0; i + 1 < n; ++i) {
     int64_t diff = std::llabs(static_cast<int64_t>(vector_data_[i + 1]) - static_cast<int64_t>(vector_data_[i]));
