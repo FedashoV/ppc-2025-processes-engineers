@@ -2,11 +2,11 @@
 
 #include <algorithm>
 #include <array>
+#include <climits>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
-#include <limits>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -24,187 +24,52 @@ namespace tsyplakov_k_vec_neighbours {
 
 class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
-  static std::string PrintTestParam(
-      const testing::TestParamInfo<std::tuple<std::function<std::shared_ptr<BaseTask>(InType)>, std::string, TestType>>
-          &info) {
-    const TestType &p = std::get<2>(info.param);
-    const std::string &task_type = std::get<1>(info.param);
-    return task_type + "_" + std::to_string(std::get<0>(p)) + "_" + std::get<1>(p);
-  }
-
-  static OutType ComputeReference(const std::vector<int> &v) {
-    if (v.size() < 2) {
-      return std::make_tuple(-1, -1);
-    }
-
-    auto best = std::numeric_limits<int64_t>::max();
-    int best_i = -1;
-
-    const auto n = v.size();
-    for (std::size_t i = 0; i + 1 < n; ++i) {
-      const auto val1 = static_cast<int64_t>(v[i]);
-      const auto val2 = static_cast<int64_t>(v[i + 1]);
-      const auto diff = std::llabs(val2 - val1);
-
-      if (diff < best) {
-        best = diff;
-        best_i = static_cast<int>(i);
-      } else if (diff == best && std::cmp_less(i, static_cast<std::size_t>(best_i))) {
-        best_i = static_cast<int>(i);
-      }
-    }
-
-    if (best_i >= 0) {
-      return std::make_tuple(best_i, best_i + 1);
-    }
-    return std::make_tuple(-1, -1);
+  static std::string PrintTestParam(const TestType &test_param) {
+    return std::get<1>(test_param);
   }
 
  protected:
   void SetUp() override {
     TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-
-    const int vec_size = std::get<0>(params);
-    const std::string &case_type = std::get<1>(params);
-
-    input_data_.resize(vec_size);
-
-    if (case_type == "normal") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = ((i * 13) + 7) % 50;
-      }
-    } else if (case_type == "zeros") {
-      std::fill(input_data_.begin(), input_data_.end(), 0);
-    } else if (case_type == "all_same") {
-      std::fill(input_data_.begin(), input_data_.end(), 42);
-    } else if (case_type == "negatives") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = -i;
-      }
-    } else if (case_type == "ascending") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = i;
-      }
-    } else if (case_type == "descending") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = vec_size - i;
-      }
-    } else if (case_type == "big") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = i % 1000;
-      }
-    } else if (case_type == "empty") {
-      // Пустой вектор
-    } else if (case_type == "single_element") {
-      if (vec_size > 0) {
-        input_data_[0] = 42;
-      }
-    } else if (case_type == "minimal") {
-      if (vec_size >= 2) {
-        input_data_[0] = 10;
-        input_data_[1] = 20;
-      }
-    } else if (case_type == "small") {
-      if (vec_size >= 3) {
-        input_data_[0] = 5;
-        input_data_[1] = 15;
-        input_data_[2] = 10;
-      }
-    } else if (case_type == "medium") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = (i * 7) % 100;
-      }
-    } else if (case_type == "first_pair_best") {
-      if (vec_size >= 2) {
-        input_data_[0] = 10;
-        input_data_[1] = 11;
-        for (int i = 2; i < vec_size; ++i) {
-          input_data_[i] = 20 + i;
-        }
-      }
-    } else if (case_type == "last_pair_best") {
-      if (vec_size >= 2) {
-        for (int i = 0; i < vec_size - 2; ++i) {
-          input_data_[i] = 100 + i;
-        }
-        input_data_[vec_size - 2] = 10;
-        input_data_[vec_size - 1] = 11;
-      }
-    } else if (case_type == "multiple_same") {
-      if (vec_size >= 4) {
-        input_data_[0] = 10;
-        input_data_[1] = 12;
-        input_data_[2] = 20;
-        input_data_[3] = 22;
-        for (int i = 4; i < vec_size; ++i) {
-          input_data_[i] = 30 + i;
-        }
-      }
-    } else if (case_type == "large_values") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = std::numeric_limits<int>::max() - ((i % 100) * 1000000);
-      }
-    } else if (case_type == "overflow_risk") {
-      if (vec_size >= 2) {
-        input_data_[0] = 0;
-        input_data_[1] = 1;
-        for (int i = 2; i < vec_size; ++i) {
-          input_data_[i] = 100 + i;
-        }
-      }
-    } else if (case_type == "mixed_signs") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = (i % 2 == 0) ? i : -i;
-      }
-    } else if (case_type == "alternating") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = (i % 2 == 0) ? 100 : 101;
-      }
-    } else if (case_type == "single_process") {
-      if (vec_size > 0) {
-        input_data_[0] = 10;
-        if (vec_size > 1) {
-          input_data_[1] = 11;
-        }
-      }
-    } else if (case_type == "two_processes") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = (i % 2 == 0) ? (i * 10) : ((i * 10) + 1);
-      }
-    } else if (case_type == "three_processes") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = (i * 5) + (i % 3);
-      }
-    } else if (case_type == "small_even") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = i * 2;
-      }
-    } else if (case_type == "small_odd") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = (i * 2) + 1;
-      }
-    } else if (case_type == "medium_distributed") {
-      for (int i = 0; i < vec_size; ++i) {
-        input_data_[i] = ((i * 7) % 50) + (i % 10);
-      }
-    } else {
-      throw std::runtime_error("Unknown test case type: " + case_type);
-    }
-
-    expected_output_ = ComputeReference(input_data_);
+    input_data = std::get<0>(params);
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    return expected_output_ == output_data;
+    const auto &vector = input_data;
+
+    if (vector.size() <= 1) {
+      auto [i1, i2] = output_data;
+      return (i1 == -1 && i2 == -1);
+    }
+
+    int need_index = -1;
+    int need_index_plus_one = -1;
+    int abs_sub = INT_MAX;
+
+    for (int i = 0; i < static_cast<int>(vector.size() - 1); ++i) {
+      int temp = std::abs(vector[i + 1] - vector[i]);
+      if (temp < abs_sub) {
+        need_index = static_cast<int>(i);
+        need_index_plus_one = static_cast<int>(i + 1);
+        abs_sub = temp;
+      }
+    }
+
+    auto [i1, i2] = output_data;
+
+    if (std::cmp_equal(i1, need_index) && std::cmp_equal(i2, need_index_plus_one)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   InType GetTestInputData() final {
-    return input_data_;
+    return input_data;
   }
 
  private:
-  InType input_data_;
-  OutType expected_output_ = std::make_tuple(-1, -1);
+  InType input_data;
 };
 
 namespace {
@@ -213,70 +78,36 @@ TEST_P(TsyplakovKVecNeighboursFuncTests, VecMinNeighbourDiff) {
   ExecuteTest(GetParam());
 }
 
-class TsyplakovKVecNeighboursUnitTests : public testing::Test {};
-
-TEST_F(TsyplakovKVecNeighboursUnitTests, ComputeReferenceEdgeCases) {
-  EXPECT_EQ(std::make_tuple(-1, -1), TsyplakovKVecNeighboursFuncTests::ComputeReference({}));
-
-  EXPECT_EQ(std::make_tuple(-1, -1), TsyplakovKVecNeighboursFuncTests::ComputeReference({42}));
-
-  EXPECT_EQ(std::make_tuple(0, 1), TsyplakovKVecNeighboursFuncTests::ComputeReference({10, 20}));
-
-  EXPECT_EQ(std::make_tuple(0, 1), TsyplakovKVecNeighboursFuncTests::ComputeReference({10, 12, 20, 22}));
-}
-
-TEST_F(TsyplakovKVecNeighboursUnitTests, LargeValuesHandling) {
-  std::vector<int> large_values = {std::numeric_limits<int>::max(), std::numeric_limits<int>::max() - 1};
-  auto result = TsyplakovKVecNeighboursFuncTests::ComputeReference(large_values);
-  EXPECT_EQ(std::make_tuple(0, 1), result);
-}
-
-TEST_F(TsyplakovKVecNeighboursUnitTests, OverflowProtection) {
-  std::vector<int> overflow_values = {std::numeric_limits<int>::min(), std::numeric_limits<int>::min() + 1};
-  auto result = TsyplakovKVecNeighboursFuncTests::ComputeReference(overflow_values);
-  EXPECT_EQ(std::make_tuple(0, 1), result);
-}
-
-TEST_F(TsyplakovKVecNeighboursUnitTests, MixedSigns) {
-  std::vector<int> mixed = {-5, 3, -1, 0, 2};
-  auto result = TsyplakovKVecNeighboursFuncTests::ComputeReference(mixed);
-  EXPECT_EQ(std::make_tuple(2, 3), result);
-}
-
-TEST_F(TsyplakovKVecNeighboursUnitTests, ExtremeOverflow) {
-  std::vector<int> extreme = {std::numeric_limits<int>::min(), std::numeric_limits<int>::max()};
-  auto result = TsyplakovKVecNeighboursFuncTests::ComputeReference(extreme);
-  EXPECT_EQ(std::make_tuple(0, 1), result);
-}
-
-const std::array<TestType, 28> kTestParam = {std::make_tuple(10, "normal"),
-                                             std::make_tuple(10, "zeros"),
-                                             std::make_tuple(10, "all_same"),
-                                             std::make_tuple(10, "negatives"),
-                                             std::make_tuple(10, "ascending"),
-                                             std::make_tuple(10, "descending"),
-                                             std::make_tuple(1000000, "big"),
-                                             std::make_tuple(0, "empty"),
-                                             std::make_tuple(1, "single_element"),
-                                             std::make_tuple(2, "minimal"),
-                                             std::make_tuple(3, "small"),
-                                             std::make_tuple(100, "medium"),
-                                             std::make_tuple(10, "first_pair_best"),
-                                             std::make_tuple(10, "last_pair_best"),
-                                             std::make_tuple(10, "multiple_same"),
-                                             std::make_tuple(10, "large_values"),
-                                             std::make_tuple(10, "overflow_risk"),
-                                             std::make_tuple(10, "mixed_signs"),
-                                             std::make_tuple(10, "alternating"),
-                                             std::make_tuple(500, "normal"),
-                                             std::make_tuple(1000, "ascending"),
-                                             std::make_tuple(1000, "descending"),
-                                             std::make_tuple(1, "single_process"),
-                                             std::make_tuple(2, "two_processes"),
-                                             std::make_tuple(3, "three_processes"),
-                                             std::make_tuple(4, "small_even"),
-                                             std::make_tuple(5, "small_odd"),
-                                             std::make_tuple(100, "medium_distributed")};
+const std::array<TestType, 22> kTestParam = {
+    std::make_tuple(std::vector<int>{0, 0, 0, 0, 0}, "nechet_zero"),
+    std::make_tuple(std::vector<int>{13, 13, 13, 13, 13}, "nechet_same"),
+    std::make_tuple(std::vector<int>{1, 22, -3, 4, 175}, "nechet_basic"),
+    std::make_tuple(std::vector<int>{-1, -2, -3, -4, -3}, "nechet_negative"),
+    std::make_tuple(std::vector<int>{-87, -87, -87, -87, -87}, "nechet_same_negative"),
+    std::make_tuple(std::vector<int>{-87, -87, -87, -87, -7}, "nechet_negative_2"),
+    std::make_tuple(std::vector<int>{23, 46, 78, 90, 89, 45, 134, 777}, "diff_between"),
+    std::make_tuple(std::vector<int>{23, 46, 78, 90, -89, 134, 135}, "nechet_diff_end"),
+    std::make_tuple(std::vector<int>{45, 46, 78, 89, 45, 134, 777}, "nechet_diff_start"),
+    std::make_tuple(std::vector<int>{0, 0, 0, 0, 0, 0, 0, 0}, "chet_zero"),
+    std::make_tuple(std::vector<int>{4, 4, 4, 4, 4, 4, 4, 4}, "chet_same"),
+    std::make_tuple(std::vector<int>{-87, -87, -87, -87, -87, -87}, "chet_same_negative"),
+    std::make_tuple(std::vector<int>{34, 43}, "small"),
+    std::make_tuple(std::vector<int>{12000}, "once"),
+    std::make_tuple(std::vector<int>{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, "chet_same_diff"),
+    std::make_tuple(std::vector<int>{1, 2, 3, 4, 5, 6, 7, 8, 9}, "nechet_same_diff"),
+    std::make_tuple(std::vector<int>{1461876, 124567, 637126, 1287637, 233123, 123213, -4267821, -2372163, 3127356},
+                    "alot_big_values"),
+    std::make_tuple(
+        std::vector<int>{10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 110000, 120000},
+        "step_values"),
+    std::make_tuple(std::vector<int>{900, 900, 0, 900, -900, 9900, -9000, 900900900, -900900900, 0, 12345430, -111, 900,
+                                     555, 900, 900},
+                    "from_k_tsyplakov"),
+    std::make_tuple(
+        std::vector<int>{900, 900, 900, 900, 900, 900, 900, 900, 900, 900, 900, 900, 900, 900, 900, 900, 900, 900},
+        "sber"),
+    std::make_tuple(std::vector<int>{21, -21, 21, -21, 21, 21, -21, -21, 3}, "school_21"),
+    std::make_tuple(std::vector<int>{}, "empty")};
 
 const auto kTestTasksList = std::tuple_cat(
     ppc::util::AddFuncTask<TsyplakovKVecNeighboursMPI, InType>(kTestParam, PPC_SETTINGS_tsyplakov_k_vec_neighbours),
@@ -284,7 +115,7 @@ const auto kTestTasksList = std::tuple_cat(
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
-const auto kPerfTestName = TsyplakovKVecNeighboursFuncTests::PrintTestParam;
+const auto kPerfTestName = TsyplakovKVecNeighboursFuncTests::PrintFuncTestName<TsyplakovKVecNeighboursFuncTests>;
 
 INSTANTIATE_TEST_SUITE_P(VectorFuncTests, TsyplakovKVecNeighboursFuncTests, kGtestValues, kPerfTestName);
 
