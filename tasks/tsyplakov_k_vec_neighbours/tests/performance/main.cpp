@@ -29,7 +29,7 @@ class TsyplakovKVecNeighboursPerfTest : public ppc::util::BaseRunPerfTests<InTyp
     if (i2 != i1 + 1) {
       return false;
     }
-    if (i1 < 0 || std::cmp_greater_equal(i2, input_data_.size())) {
+    if (i1 < 0 || std::cmp_greater_equal(i2, input_data.size())) {
       return false;
     }
 
@@ -37,7 +37,7 @@ class TsyplakovKVecNeighboursPerfTest : public ppc::util::BaseRunPerfTests<InTyp
   }
 
   InType GetTestInputData() final {
-    return input_data_;
+    return input_data;
   }
 };
 
