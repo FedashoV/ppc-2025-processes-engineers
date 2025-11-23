@@ -1,14 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <algorithm>
 #include <array>
 #include <climits>
 #include <cstddef>
-#include <cstdint>
 #include <cstdlib>
-#include <functional>
-#include <memory>
-#include <stdexcept>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -31,11 +26,11 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
  protected:
   void SetUp() override {
     TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-    input_data = std::get<0>(params);
+    input_data_ = std::get<0>(params);
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    const auto &vector = input_data;
+    const auto &vector = input_data_;
 
     if (vector.size() <= 1) {
       auto [i1, i2] = output_data;
@@ -46,30 +41,26 @@ class TsyplakovKVecNeighboursFuncTests : public ppc::util::BaseRunFuncTests<InTy
     int need_index_plus_one = -1;
     int abs_sub = INT_MAX;
 
-    for (int i = 0; i < static_cast<int>(vector.size() - 1); ++i) {
+    for (int i = 0; std::cmp_less(i, vector.size() - 1); ++i) {
       int temp = std::abs(vector[i + 1] - vector[i]);
       if (temp < abs_sub) {
-        need_index = static_cast<int>(i);
-        need_index_plus_one = static_cast<int>(i + 1);
+        need_index = i;
+        need_index_plus_one = i + 1;
         abs_sub = temp;
       }
     }
 
     auto [i1, i2] = output_data;
 
-    if (std::cmp_equal(i1, need_index) && std::cmp_equal(i2, need_index_plus_one)) {
-      return true;
-    } else {
-      return false;
-    }
+    return std::cmp_equal(i1, need_index) && std::cmp_equal(i2, need_index_plus_one);
   }
 
   InType GetTestInputData() final {
-    return input_data;
+    return input_data_;
   }
 
  private:
-  InType input_data;
+  InType input_data_;
 };
 
 namespace {

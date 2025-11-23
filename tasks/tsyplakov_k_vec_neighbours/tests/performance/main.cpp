@@ -13,14 +13,14 @@ namespace tsyplakov_k_vec_neighbours {
 class TsyplakovKVecNeighboursPerfTest : public ppc::util::BaseRunPerfTests<InType, OutType> {
  protected:
   static const int kCount = 150000000;
-  InType input_data;
+  InType input_data_;
 
   void SetUp() override {
     std::vector<int> vec(kCount);
     for (int i = 0; i < kCount; ++i) {
       vec[i] = i;
     }
-    input_data = vec;
+    input_data_ = vec;
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
@@ -29,7 +29,7 @@ class TsyplakovKVecNeighboursPerfTest : public ppc::util::BaseRunPerfTests<InTyp
     if (i2 != i1 + 1) {
       return false;
     }
-    if (i1 < 0 || std::cmp_greater_equal(i2, input_data.size())) {
+    if (i1 < 0 || std::cmp_greater_equal(i2, input_data_.size())) {
       return false;
     }
 
@@ -37,7 +37,7 @@ class TsyplakovKVecNeighboursPerfTest : public ppc::util::BaseRunPerfTests<InTyp
   }
 
   InType GetTestInputData() final {
-    return input_data;
+    return input_data_;
   }
 };
 
