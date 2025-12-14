@@ -9,7 +9,6 @@
 
 namespace tsyplakov_k_from_all_to_one {
 
-// Шаблонный класс для поддержки int, float, double
 template <typename T>
 class TsyplakovKFromAllToOneMPI : public BaseTaskT<T> {
  public:
@@ -28,7 +27,6 @@ class TsyplakovKFromAllToOneMPI : public BaseTaskT<T> {
   std::vector<T> gathered_;
 };
 
-// Шаблонная версия My_MPI_Gather
 int My_MPI_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount,
                   MPI_Datatype recvtype, int root, MPI_Comm comm);
 

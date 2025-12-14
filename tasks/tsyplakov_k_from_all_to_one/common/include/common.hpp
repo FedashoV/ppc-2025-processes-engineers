@@ -6,14 +6,13 @@
 
 namespace tsyplakov_k_from_all_to_one {
 
-// Шаблон для поддержки разных типов данных
 template <typename T>
-using InTypeT = std::tuple<std::vector<T>, int>;  // Массив данных и root
+using InTypeT = std::tuple<std::vector<T>, int>; 
 
 template <typename T>
-using OutTypeT = std::vector<T>;  // На выходе получаем все данные
+using OutTypeT = std::vector<T>; 
 
-using TestType = std::tuple<std::vector<int>, int, std::string>;  // Параметры теста
+using TestType = std::tuple<std::vector<int>, int, std::string>;  
 template <typename T>
 using BaseTaskT = ppc::task::Task<InTypeT<T>, OutTypeT<T>>;
 

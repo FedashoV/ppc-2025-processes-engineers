@@ -14,9 +14,7 @@
 
 namespace tsyplakov_k_from_all_to_one {
 
-// =======================
-// MPI FUNCTIONAL TEST
-// =======================
+
 TEST(TsyplakovKFromAllToOneMPI, GatherIntRoot0) {
 #ifdef USE_MPI
   int rank = 0, size = 1;
@@ -48,9 +46,6 @@ TEST(TsyplakovKFromAllToOneMPI, GatherIntRoot0) {
 #endif
 }
 
-// =======================
-// MPI WITH NON-ZERO ROOT
-// =======================
 TEST(TsyplakovKFromAllToOneMPI, GatherIntRootMiddle) {
 #ifdef USE_MPI
   int rank = 0, size = 1;
@@ -77,9 +72,7 @@ TEST(TsyplakovKFromAllToOneMPI, GatherIntRootMiddle) {
 #endif
 }
 
-// =======================
-// SEQ FUNCTIONAL TEST
-// =======================
+
 TEST(TsyplakovKFromAllToOneSEQ, BasicSeq) {
   std::vector<int> data = {1, 2, 3, 4};
   int root = 0;
@@ -88,7 +81,7 @@ TEST(TsyplakovKFromAllToOneSEQ, BasicSeq) {
   TsyplakovKFromAllToOneSEQ task(in);
 
   ASSERT_TRUE(task.Validation());
-  ASSERT_TRUE(task.PreProcessing());  // ✅ ВАЖНО
+  ASSERT_TRUE(task.PreProcessing());  
   ASSERT_TRUE(task.Run());
   ASSERT_TRUE(task.PostProcessing());
 

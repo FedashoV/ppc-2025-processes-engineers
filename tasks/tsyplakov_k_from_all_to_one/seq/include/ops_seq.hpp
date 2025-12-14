@@ -7,7 +7,6 @@
 
 namespace tsyplakov_k_from_all_to_one {
 
-// Типы для Seq-версии (только int)
 using InTypeSEQ = InTypeT<int>;
 using OutTypeSEQ = OutTypeT<int>;
 using BaseTaskSEQ = BaseTaskT<int>;
