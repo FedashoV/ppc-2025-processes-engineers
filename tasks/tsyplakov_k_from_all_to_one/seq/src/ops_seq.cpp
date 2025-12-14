@@ -5,7 +5,7 @@ namespace tsyplakov_k_from_all_to_one {
 // =======================================================
 // Конструктор
 // =======================================================
-TsyplakovKFromAllToOneSEQ::TsyplakovKFromAllToOneSEQ(const InTypeSEQ& in) {
+TsyplakovKFromAllToOneSEQ::TsyplakovKFromAllToOneSEQ(const InTypeSEQ &in) {
   this->SetTypeOfTask(GetStaticTypeOfTask());
   this->GetInput() = in;
 }
@@ -14,7 +14,7 @@ TsyplakovKFromAllToOneSEQ::TsyplakovKFromAllToOneSEQ(const InTypeSEQ& in) {
 // Validation
 // =======================================================
 bool TsyplakovKFromAllToOneSEQ::ValidationImpl() {
-  auto& [data, root] = this->GetInput();
+  auto &[data, root] = this->GetInput();
   return !data.empty() && root >= 0;
 }
 
@@ -30,7 +30,7 @@ bool TsyplakovKFromAllToOneSEQ::PreProcessingImpl() {
 // RunImpl
 // =======================================================
 bool TsyplakovKFromAllToOneSEQ::RunImpl() {
-  auto& [data, root] = this->GetInput();
+  auto &[data, root] = this->GetInput();
 
   // В последовательном варианте просто копируем данные
   // на «root» (обычно root = 0)

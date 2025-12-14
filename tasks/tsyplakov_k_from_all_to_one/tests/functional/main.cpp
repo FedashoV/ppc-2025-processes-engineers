@@ -36,7 +36,7 @@ TEST(TsyplakovKFromAllToOneMPI, GatherIntRoot0) {
   ASSERT_TRUE(task.PostProcessing());
 
   if (rank == root) {
-    const auto& out = task.GetOutput();
+    const auto &out = task.GetOutput();
     ASSERT_EQ(out.size(), size * local_size);
 
     for (int r = 0; r < size; ++r) {
@@ -66,7 +66,7 @@ TEST(TsyplakovKFromAllToOneMPI, GatherIntRootMiddle) {
   task.Run();
 
   if (rank == root) {
-    const auto& out = task.GetOutput();
+    const auto &out = task.GetOutput();
     ASSERT_EQ(out.size(), size * 3);
     for (int r = 0; r < size; ++r) {
       for (int i = 0; i < 3; ++i) {
@@ -92,7 +92,7 @@ TEST(TsyplakovKFromAllToOneSEQ, BasicSeq) {
   ASSERT_TRUE(task.Run());
   ASSERT_TRUE(task.PostProcessing());
 
-  const auto& out = task.GetOutput();
+  const auto &out = task.GetOutput();
   EXPECT_EQ(out, data);
 }
 

@@ -10,7 +10,7 @@ namespace tsyplakov_k_from_all_to_one {
 // Конструктор
 // =======================================================
 template <typename T>
-TsyplakovKFromAllToOneMPI<T>::TsyplakovKFromAllToOneMPI(const InTypeT<T>& in) {
+TsyplakovKFromAllToOneMPI<T>::TsyplakovKFromAllToOneMPI(const InTypeT<T> &in) {
   this->SetTypeOfTask(GetStaticTypeOfTask());
   this->GetInput() = in;
 }
@@ -20,7 +20,7 @@ TsyplakovKFromAllToOneMPI<T>::TsyplakovKFromAllToOneMPI(const InTypeT<T>& in) {
 // =======================================================
 template <typename T>
 bool TsyplakovKFromAllToOneMPI<T>::ValidationImpl() {
-  const auto& [data, root] = this->GetInput();
+  const auto &[data, root] = this->GetInput();
   return !data.empty() && root >= 0;
 }
 
@@ -43,7 +43,7 @@ bool TsyplakovKFromAllToOneMPI<T>::RunImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  const auto& [local_vec, root] = this->GetInput();
+  const auto &[local_vec, root] = this->GetInput();
   const int sendcount = static_cast<int>(local_vec.size());
 
   // Определяем MPI_Datatype по T
@@ -55,7 +55,7 @@ bool TsyplakovKFromAllToOneMPI<T>::RunImpl() {
   } else if constexpr (std::is_same_v<T, double>) {
     mpi_type = MPI_DOUBLE;
   } else {
-    static_assert(!sizeof(T*), "Unsupported type for MPI_Gather");
+    static_assert(!sizeof(T *), "Unsupported type for MPI_Gather");
   }
 
   std::vector<T> recvbuf;
@@ -87,7 +87,7 @@ bool TsyplakovKFromAllToOneMPI<T>::PostProcessingImpl() {
 // =======================================================
 // Реализация My_MPI_Gather (универсальная)
 // =======================================================
-int My_MPI_Gather(const void* sendbuf, int sendcount, MPI_Datatype sendtype, void* recvbuf, int recvcount,
+int My_MPI_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount,
                   MPI_Datatype recvtype, int root, MPI_Comm comm) {
   int rank = 0, size = 1;
   MPI_Comm_rank(comm, &rank);
@@ -102,8 +102,8 @@ int My_MPI_Gather(const void* sendbuf, int sendcount, MPI_Datatype sendtype, voi
   const int block_bytes = sendcount * type_size;
 
   int blocks = 1;
-  int* ranks = static_cast<int*>(std::malloc(sizeof(int)));
-  void* data = std::malloc(block_bytes);
+  int *ranks = static_cast<int *>(std::malloc(sizeof(int)));
+  void *data = std::malloc(block_bytes);
 
   ranks[0] = rank;
   std::memcpy(data, sendbuf, block_bytes);
@@ -120,12 +120,12 @@ int My_MPI_Gather(const void* sendbuf, int sendcount, MPI_Datatype sendtype, voi
         int recv_blocks = 0;
         MPI_Recv(&recv_blocks, 1, MPI_INT, real_src, 0, comm, MPI_STATUS_IGNORE);
 
-        ranks = static_cast<int*>(std::realloc(ranks, (blocks + recv_blocks) * sizeof(int)));
+        ranks = static_cast<int *>(std::realloc(ranks, (blocks + recv_blocks) * sizeof(int)));
         data = std::realloc(data, (blocks + recv_blocks) * block_bytes);
 
         for (int i = 0; i < recv_blocks; ++i) {
           MPI_Recv(&ranks[blocks + i], 1, MPI_INT, real_src, 0, comm, MPI_STATUS_IGNORE);
-          MPI_Recv(static_cast<char*>(data) + (blocks + i) * block_bytes, block_bytes, MPI_BYTE, real_src, 0, comm,
+          MPI_Recv(static_cast<char *>(data) + (blocks + i) * block_bytes, block_bytes, MPI_BYTE, real_src, 0, comm,
                    MPI_STATUS_IGNORE);
         }
 
@@ -139,7 +139,7 @@ int My_MPI_Gather(const void* sendbuf, int sendcount, MPI_Datatype sendtype, voi
 
       for (int i = 0; i < blocks; ++i) {
         MPI_Send(&ranks[i], 1, MPI_INT, real_dest, 0, comm);
-        MPI_Send(static_cast<char*>(data) + i * block_bytes, block_bytes, MPI_BYTE, real_dest, 0, comm);
+        MPI_Send(static_cast<char *>(data) + i * block_bytes, block_bytes, MPI_BYTE, real_dest, 0, comm);
       }
       break;
     }
@@ -148,7 +148,7 @@ int My_MPI_Gather(const void* sendbuf, int sendcount, MPI_Datatype sendtype, voi
 
   if (rank == root) {
     for (int i = 0; i < blocks; ++i) {
-      std::memcpy(static_cast<char*>(recvbuf) + ranks[i] * block_bytes, static_cast<char*>(data) + i * block_bytes,
+      std::memcpy(static_cast<char *>(recvbuf) + ranks[i] * block_bytes, static_cast<char *>(data) + i * block_bytes,
                   block_bytes);
     }
   }

@@ -40,7 +40,7 @@ class TsyplakovKRunPerfTestFromAllToOne : public ppc::util::BaseRunPerfTests<InT
 
   // -----------------------------------------------------
   // Проверка результата (только на root)
-  bool CheckTestOutputData(OutTypeT<T>& output_data) final {
+  bool CheckTestOutputData(OutTypeT<T> &output_data) final {
 #ifdef USE_MPI
     int rank = 0, size = 1;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);

@@ -17,7 +17,7 @@ class TsyplakovKFromAllToOneMPI : public BaseTaskT<T> {
     return ppc::task::TypeOfTask::kMPI;
   }
 
-  explicit TsyplakovKFromAllToOneMPI(const InTypeT<T>& in);
+  explicit TsyplakovKFromAllToOneMPI(const InTypeT<T> &in);
 
  private:
   bool ValidationImpl() override;
@@ -29,7 +29,7 @@ class TsyplakovKFromAllToOneMPI : public BaseTaskT<T> {
 };
 
 // Шаблонная версия My_MPI_Gather
-int My_MPI_Gather(const void* sendbuf, int sendcount, MPI_Datatype sendtype, void* recvbuf, int recvcount,
+int My_MPI_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount,
                   MPI_Datatype recvtype, int root, MPI_Comm comm);
 
 }  // namespace tsyplakov_k_from_all_to_one
