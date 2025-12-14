@@ -6,13 +6,11 @@
 
 namespace tsyplakov_k_from_all_to_one {
 
-
 template <typename T>
 TsyplakovKFromAllToOneMPI<T>::TsyplakovKFromAllToOneMPI(const InTypeT<T> &in) {
   this->SetTypeOfTask(GetStaticTypeOfTask());
   this->GetInput() = in;
 }
-
 
 template <typename T>
 bool TsyplakovKFromAllToOneMPI<T>::ValidationImpl() {
@@ -20,13 +18,11 @@ bool TsyplakovKFromAllToOneMPI<T>::ValidationImpl() {
   return !data.empty() && root >= 0;
 }
 
-
 template <typename T>
 bool TsyplakovKFromAllToOneMPI<T>::PreProcessingImpl() {
   gathered_.clear();
   return true;
 }
-
 
 template <typename T>
 bool TsyplakovKFromAllToOneMPI<T>::RunImpl() {
@@ -37,7 +33,6 @@ bool TsyplakovKFromAllToOneMPI<T>::RunImpl() {
 
   const auto &[local_vec, root] = this->GetInput();
   const int sendcount = static_cast<int>(local_vec.size());
-
 
   MPI_Datatype mpi_type;
   if constexpr (std::is_same_v<T, int>) {
@@ -68,12 +63,10 @@ bool TsyplakovKFromAllToOneMPI<T>::RunImpl() {
   return true;
 }
 
-
 template <typename T>
 bool TsyplakovKFromAllToOneMPI<T>::PostProcessingImpl() {
   return true;
 }
-
 
 int My_MPI_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount,
                   MPI_Datatype recvtype, int root, MPI_Comm comm) {
@@ -145,7 +138,6 @@ int My_MPI_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype, voi
   std::free(data);
   return MPI_SUCCESS;
 }
-
 
 template class TsyplakovKFromAllToOneMPI<int>;
 template class TsyplakovKFromAllToOneMPI<float>;

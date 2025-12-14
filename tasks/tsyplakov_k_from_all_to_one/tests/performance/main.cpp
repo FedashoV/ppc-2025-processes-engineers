@@ -11,19 +11,16 @@
 
 namespace tsyplakov_k_from_all_to_one {
 
-
 template <typename T>
 class TsyplakovKRunPerfTestFromAllToOne : public ppc::util::BaseRunPerfTests<InTypeT<T>, OutTypeT<T>> {
  protected:
   static constexpr size_t kLocalCount = 7000000;
   InTypeT<T> input_data_;
 
-
   void SetUp() override {
 #ifdef USE_MPI
     int rank = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
 
     std::vector<T> local_vec(kLocalCount, static_cast<T>(rank));
     input_data_ = std::make_tuple(local_vec, 0);
@@ -35,7 +32,6 @@ class TsyplakovKRunPerfTestFromAllToOne : public ppc::util::BaseRunPerfTests<InT
     input_data_ = std::make_tuple(vec, 0);
 #endif
   }
-
 
   bool CheckTestOutputData(OutTypeT<T> &output_data) final {
 #ifdef USE_MPI
@@ -65,19 +61,14 @@ class TsyplakovKRunPerfTestFromAllToOne : public ppc::util::BaseRunPerfTests<InT
 #endif
   }
 
-
   InTypeT<T> GetTestInputData() final {
     return input_data_;
   }
 };
 
-
-
 using PerfTestInt = TsyplakovKRunPerfTestFromAllToOne<int>;
 using PerfTestFloat = TsyplakovKRunPerfTestFromAllToOne<float>;
 using PerfTestDouble = TsyplakovKRunPerfTestFromAllToOne<double>;
-
-
 
 TEST_P(PerfTestInt, RunPerfModes) {
   ExecuteTest(GetParam());
@@ -89,23 +80,17 @@ TEST_P(PerfTestDouble, RunPerfModes) {
   ExecuteTest(GetParam());
 }
 
-
-
 namespace {
-
 
 const auto kAllPerfTasksInt =
     ppc::util::MakeAllPerfTasks<InTypeT<int>, TsyplakovKFromAllToOneMPI<int>, TsyplakovKFromAllToOneSEQ>(
         PPC_SETTINGS_tsyplakov_k_from_all_to_one);
 
-
 const auto kAllPerfTasksFloat = ppc::util::MakeAllPerfTasks<InTypeT<float>, TsyplakovKFromAllToOneMPI<float>>(
     PPC_SETTINGS_tsyplakov_k_from_all_to_one);
 
-
 const auto kAllPerfTasksDouble = ppc::util::MakeAllPerfTasks<InTypeT<double>, TsyplakovKFromAllToOneMPI<double>>(
     PPC_SETTINGS_tsyplakov_k_from_all_to_one);
-
 
 INSTANTIATE_TEST_SUITE_P(IntPerf, PerfTestInt, ppc::util::TupleToGTestValues(kAllPerfTasksInt),
                          PerfTestInt::CustomPerfTestName);
