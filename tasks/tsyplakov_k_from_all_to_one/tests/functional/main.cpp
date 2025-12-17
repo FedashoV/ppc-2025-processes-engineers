@@ -1,11 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <string>
-#include <tuple>
 #include <vector>
 
 #include "../../common/include/common.hpp"
-#include "../../mpi/include/ops_mpi.hpp"
 #include "../../seq/include/ops_seq.hpp"
 
 #ifdef USE_MPI

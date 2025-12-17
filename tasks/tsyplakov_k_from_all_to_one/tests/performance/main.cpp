@@ -14,8 +14,8 @@ namespace tsyplakov_k_from_all_to_one {
 template <typename T>
 class TsyplakovKRunPerfTestFromAllToOne : public ppc::util::BaseRunPerfTests<InTypeT<T>, OutTypeT<T>> {
  protected:
-  static constexpr size_t kLocalCount = 7000000;
-  InTypeT<T> input_data_;
+  static constexpr unsigned int kLocalCount = 7000000;
+  InTypeT<T> input_data;
 
   void SetUp() override {
 #ifdef USE_MPI
@@ -23,13 +23,13 @@ class TsyplakovKRunPerfTestFromAllToOne : public ppc::util::BaseRunPerfTests<InT
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     std::vector<T> local_vec(kLocalCount, static_cast<T>(rank));
-    input_data_ = std::make_tuple(local_vec, 0);
+    input_data = std::make_tuple(local_vec, 0);
 #else
     std::vector<T> vec(kLocalCount);
-    for (size_t i = 0; i < kLocalCount; ++i) {
+    for (unsigned int i = 0; i < kLocalCount; ++i) {
       vec[i] = static_cast<T>(i);
     }
-    input_data_ = std::make_tuple(vec, 0);
+    input_data = std::make_tuple(vec, 0);
 #endif
   }
 
@@ -39,7 +39,7 @@ class TsyplakovKRunPerfTestFromAllToOne : public ppc::util::BaseRunPerfTests<InT
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    const int root = std::get<1>(input_data_);
+    const int root = std::get<1>(input_data);
     if (rank != root) {
       return true;
     }
@@ -57,12 +57,12 @@ class TsyplakovKRunPerfTestFromAllToOne : public ppc::util::BaseRunPerfTests<InT
     }
     return true;
 #else
-    return output_data == std::get<0>(input_data_);
+    return output_data == std::get<0>(input_data);
 #endif
   }
 
   InTypeT<T> GetTestInputData() final {
-    return input_data_;
+    return input_data;
   }
 };
 
