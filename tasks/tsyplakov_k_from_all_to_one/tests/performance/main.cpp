@@ -34,8 +34,7 @@ class TsyplakovKRunPerfTestFromAllToOne : public ppc::util::BaseRunPerfTests<InT
 
   bool CheckTestOutputData(OutTypeT<T> &output_data) final {
 #ifdef USE_MPI
-    int rank = 0
-    int size = 1;
+    int rank = 0 int size = 1;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 

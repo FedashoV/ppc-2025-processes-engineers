@@ -8,14 +8,14 @@
 namespace tsyplakov_k_from_all_to_one {
 
 template <typename T>
-TsyplakovKFromAllToOneMPI<T>::TsyplakovKFromAllToOneMPI(const InTypeT<T>& in) {
+TsyplakovKFromAllToOneMPI<T>::TsyplakovKFromAllToOneMPI(const InTypeT<T> &in) {
   this->SetTypeOfTask(GetStaticTypeOfTask());
   this->GetInput() = in;
 }
 
 template <typename T>
 bool TsyplakovKFromAllToOneMPI<T>::ValidationImpl() {
-  const auto& [data, root] = this->GetInput();
+  const auto &[data, root] = this->GetInput();
   return !data.empty() && root >= 0;
 }
 
@@ -33,7 +33,7 @@ bool TsyplakovKFromAllToOneMPI<T>::RunImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  const auto& [local_vec, root] = this->GetInput();
+  const auto &[local_vec, root] = this->GetInput();
   const int sendcount = static_cast<int>(local_vec.size());
 
   MPI_Datatype mpi_type{};
@@ -44,7 +44,7 @@ bool TsyplakovKFromAllToOneMPI<T>::RunImpl() {
   } else if constexpr (std::is_same_v<T, double>) {
     mpi_type = MPI_DOUBLE;
   } else {
-    static_assert(!sizeof(T*), "Unsupported MPI type");
+    static_assert(!sizeof(T *), "Unsupported MPI type");
   }
 
   std::vector<T> recvbuf;
@@ -84,8 +84,8 @@ static int CheckArgs(int sendcount, int recvcount, MPI_Datatype sendtype, MPI_Da
   return MPI_SUCCESS;
 }
 
-static void ReceiveBlocks(int real_src, int block_bytes, MPI_Comm comm, std::vector<int>& ranks,
-                          std::vector<std::byte>& data) {
+static void ReceiveBlocks(int real_src, int block_bytes, MPI_Comm comm, std::vector<int> &ranks,
+                          std::vector<std::byte> &data) {
   int recv_blocks = 0;
   MPI_Recv(&recv_blocks, 1, MPI_INT, real_src, 0, comm, MPI_STATUS_IGNORE);
 
@@ -101,8 +101,8 @@ static void ReceiveBlocks(int real_src, int block_bytes, MPI_Comm comm, std::vec
   }
 }
 
-static void SendBlocks(int real_dest, int block_bytes, MPI_Comm comm, const std::vector<int>& ranks,
-                       const std::vector<std::byte>& data) {
+static void SendBlocks(int real_dest, int block_bytes, MPI_Comm comm, const std::vector<int> &ranks,
+                       const std::vector<std::byte> &data) {
   const int blocks = static_cast<int>(ranks.size());
 
   MPI_Send(&blocks, 1, MPI_INT, real_dest, 0, comm);
@@ -115,7 +115,7 @@ static void SendBlocks(int real_dest, int block_bytes, MPI_Comm comm, const std:
 }
 
 static void GatherStep(int step, int size, int rel_rank, int root, int block_bytes, MPI_Comm comm,
-                       std::vector<int>& ranks, std::vector<std::byte>& data) {
+                       std::vector<int> &ranks, std::vector<std::byte> &data) {
   if (rel_rank % (2 * step) == 0) {
     const int src = rel_rank + step;
     if (src < size) {
@@ -129,17 +129,17 @@ static void GatherStep(int step, int size, int rel_rank, int root, int block_byt
   }
 }
 
-static void AssembleRoot(int block_bytes, void* recvbuf, const std::vector<int>& ranks,
-                         const std::vector<std::byte>& data) {
+static void AssembleRoot(int block_bytes, void *recvbuf, const std::vector<int> &ranks,
+                         const std::vector<std::byte> &data) {
   const int blocks = static_cast<int>(ranks.size());
 
   for (int i = 0; i < blocks; ++i) {
-    std::memcpy(static_cast<std::byte*>(recvbuf) + Offset(ranks[static_cast<std::size_t>(i)], block_bytes),
+    std::memcpy(static_cast<std::byte *>(recvbuf) + Offset(ranks[static_cast<std::size_t>(i)], block_bytes),
                 data.data() + Offset(i, block_bytes), static_cast<std::size_t>(block_bytes));
   }
 }
 
-int MyMpiGather(const void* sendbuf, int sendcount, MPI_Datatype sendtype, void* recvbuf, int recvcount,
+int MyMpiGather(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount,
                 MPI_Datatype recvtype, int root, MPI_Comm comm) {
   const int check = CheckArgs(sendcount, recvcount, sendtype, recvtype);
   if (check != MPI_SUCCESS) {
