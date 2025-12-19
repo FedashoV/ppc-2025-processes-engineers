@@ -17,47 +17,15 @@ class TsyplakovKRunPerfTestFromAllToOne : public ppc::util::BaseRunPerfTests<InT
   InTypeT<T> input_data;
 
   void SetUp() override {
-#ifdef USE_MPI
-    int rank = 0;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    std::vector<T> local_vec(kLocalCount, static_cast<T>(rank));
-    input_data = std::make_tuple(local_vec, 0);
-#else
     std::vector<T> vec(kLocalCount);
     for (unsigned int i = 0; i < kLocalCount; ++i) {
       vec[i] = static_cast<T>(i);
     }
     input_data = std::make_tuple(vec, 0);
-#endif
   }
 
   bool CheckTestOutputData(OutTypeT<T> &output_data) final {
-#ifdef USE_MPI
-    int rank = 0 int size = 1;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-    const int root = std::get<1>(input_data);
-    if (rank != root) {
-      return true;
-    }
-
-    if (output_data.size() != size * kLocalCount) {
-      return false;
-    }
-
-    for (int r = 0; r < size; ++r) {
-      for (size_t i = 0; i < kLocalCount; ++i) {
-        if (output_data[r * kLocalCount + i] != static_cast<T>(r)) {
-          return false;
-        }
-      }
-    }
-    return true;
-#else
     return output_data == std::get<0>(input_data);
-#endif
   }
 
   InTypeT<T> GetTestInputData() final {
