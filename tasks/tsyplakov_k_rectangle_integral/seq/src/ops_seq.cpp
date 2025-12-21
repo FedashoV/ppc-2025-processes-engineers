@@ -5,7 +5,7 @@
 
 namespace tsyplakov_k_rectangle_integral {
 
-TsyplakovKRectangleIntegralSEQ::TsyplakovKRectangleIntegralSEQ(const InType& in) {
+TsyplakovKRectangleIntegralSEQ::TsyplakovKRectangleIntegralSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0.0;
@@ -35,7 +35,7 @@ bool TsyplakovKRectangleIntegralSEQ::PreProcessingImpl() {
 }
 
 bool TsyplakovKRectangleIntegralSEQ::RunImpl() {
-  const auto& input = GetInput();
+  const auto &input = GetInput();
   const int steps = static_cast<int>(input.back());
   const int dim = (input.size() - 1) / 2;
 

@@ -10,7 +10,7 @@ class TsyplakovKRectangleIntegralMPI : public BaseTask {
     return ppc::task::TypeOfTask::kMPI;
   }
 
-  explicit TsyplakovKRectangleIntegralMPI(const InType& in);
+  explicit TsyplakovKRectangleIntegralMPI(const InType &in);
 
  private:
   bool ValidationImpl() override;

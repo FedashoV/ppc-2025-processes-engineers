@@ -16,7 +16,7 @@ class TsyplakovKRunPerfTests : public ppc::util::BaseRunPerfTests<InType, OutTyp
     input_data_ = {0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 200};
   }
 
-  bool CheckTestOutputData(OutType& output_data) final {
+  bool CheckTestOutputData(OutType &output_data) final {
     const double expected = 1.5;
     const double eps = 5e-2;
     return std::abs(output_data - expected) < eps;

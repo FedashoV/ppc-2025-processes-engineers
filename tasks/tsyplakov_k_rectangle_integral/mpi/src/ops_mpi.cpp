@@ -7,7 +7,7 @@
 
 namespace tsyplakov_k_rectangle_integral {
 
-TsyplakovKRectangleIntegralMPI::TsyplakovKRectangleIntegralMPI(const InType& in) {
+TsyplakovKRectangleIntegralMPI::TsyplakovKRectangleIntegralMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0.0;
@@ -41,7 +41,7 @@ bool TsyplakovKRectangleIntegralMPI::RunImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  const auto& input = GetInput();
+  const auto &input = GetInput();
   const int steps = static_cast<int>(input.back());
   const int dim = (input.size() - 1) / 2;
 

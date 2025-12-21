@@ -10,7 +10,7 @@ class TsyplakovKRectangleIntegralSEQ : public BaseTask {
     return ppc::task::TypeOfTask::kSEQ;
   }
 
-  explicit TsyplakovKRectangleIntegralSEQ(const InType& in);
+  explicit TsyplakovKRectangleIntegralSEQ(const InType &in);
 
  private:
   bool ValidationImpl() override;
