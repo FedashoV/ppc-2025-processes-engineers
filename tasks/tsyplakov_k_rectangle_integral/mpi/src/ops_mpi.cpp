@@ -1,13 +1,14 @@
 #include "tsyplakov_k_rectangle_integral/mpi/include/ops_mpi.hpp"
-#include "util/include/util.hpp"
-#include "tsyplakov_k_rectangle_integral/common/include/common.hpp"
 
 #include <mpi.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <vector>
-#include <algorithm>
+
+#include "tsyplakov_k_rectangle_integral/common/include/common.hpp"
+#include "util/include/util.hpp"
 
 namespace tsyplakov_k_rectangle_integral {
 

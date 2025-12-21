@@ -1,9 +1,10 @@
 #include "tsyplakov_k_rectangle_integral/seq/include/ops_seq.hpp"
-#include "util/include/util.hpp"
-#include "tsyplakov_k_rectangle_integral/common/include/common.hpp"
 
 #include <cmath>
 #include <vector>
+
+#include "tsyplakov_k_rectangle_integral/common/include/common.hpp"
+#include "util/include/util.hpp"
 
 namespace tsyplakov_k_rectangle_integral {
 

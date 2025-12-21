@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 
+#include <array>
 #include <cmath>
 #include <tuple>
 #include <vector>
-#include <array>
 
 #include "tsyplakov_k_rectangle_integral/common/include/common.hpp"
 #include "tsyplakov_k_rectangle_integral/mpi/include/ops_mpi.hpp"
