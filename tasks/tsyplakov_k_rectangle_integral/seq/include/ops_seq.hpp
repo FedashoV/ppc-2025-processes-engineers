@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tsyplakov_k_rectangle_integral/common/include/common.hpp"
+#include "task/include/task.hpp"
 
 namespace tsyplakov_k_rectangle_integral {
 
