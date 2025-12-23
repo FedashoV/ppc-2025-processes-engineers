@@ -17,8 +17,6 @@ namespace tsyplakov_k_rectangle_integral {
 
 class TsyplakovKRunFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
-  TsyplakovKRunFuncTests() : ppc::util::BaseRunFuncTests<InType, OutType, TestType>() {}
-
   static std::string PrintTestParam(const TestType &param) {
     int steps = static_cast<int>(std::get<0>(param).back());
     return "steps_" + std::to_string(steps);
@@ -27,23 +25,23 @@ class TsyplakovKRunFuncTests : public ppc::util::BaseRunFuncTests<InType, OutTyp
  protected:
   void SetUp() override {
     TestType params = std::get<static_cast<size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-
-    input_data_ = std::get<0>(params);
-    expected_ = std::get<1>(params);
+    this->input_ = std::get<0>(params);
+    this->expected_ = std::get<1>(params);
   }
+};
 
-  bool CheckTestOutputData(OutType &output_data) final {
-    const double eps = 3e-2;
-    return std::abs(output_data - expected_) < eps;
-  }
+bool CheckTestOutputData(OutType &output_data) final {
+  const double eps = 3e-2;
+  return std::abs(output_data - expected_) < eps;
+}
 
-  InType GetTestInputData() final {
-    return input_data_;
-  }
+InType GetTestInputData() final {
+  return input_data_;
+}
 
- private:
-  InType input_data_;
-  OutType expected_;
+private:
+InType input_data_;
+OutType expected_;
 };
 
 namespace {
