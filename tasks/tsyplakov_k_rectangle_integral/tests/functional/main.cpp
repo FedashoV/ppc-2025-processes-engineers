@@ -17,8 +17,7 @@ namespace tsyplakov_k_rectangle_integral {
 
 class TsyplakovKRunFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
-  TsyplakovKRunFuncTests()
-    : ppc::util::BaseRunFuncTests<InType, OutType, TestType>() {}
+  TsyplakovKRunFuncTests() : ppc::util::BaseRunFuncTests<InType, OutType, TestType>() {}
 
   static std::string PrintTestParam(const TestType &param) {
     int steps = static_cast<int>(std::get<0>(param).back());
