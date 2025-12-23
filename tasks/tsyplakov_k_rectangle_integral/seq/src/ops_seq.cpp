@@ -46,7 +46,7 @@ bool TsyplakovKRectangleIntegralSEQ::RunImpl() {
   std::vector<double> b(dim);
   std::vector<double> h(dim);
 
-  for (int i = 0; i < dim; ++i) {
+  for (size_t i = 0; i < dim; ++i) {
     a[i] = input[static_cast<size_t>(2) * i];
     b[i] = input[(static_cast<size_t>(2) * i) + 1];
     h[i] = (b[i] - a[i]) / steps;
@@ -58,7 +58,7 @@ bool TsyplakovKRectangleIntegralSEQ::RunImpl() {
     int tmp = idx;
     double f_value = 0.0;
 
-    for (int dd = 0; dd < dim; ++dd) {
+    for (size_t dd = 0; dd < dim; ++dd) {
       int coord = tmp % steps;
       tmp /= steps;
 
@@ -70,7 +70,7 @@ bool TsyplakovKRectangleIntegralSEQ::RunImpl() {
   }
 
   double volume = 1.0;
-  for (int dd = 0; dd < dim; ++dd) {
+  for (size_t dd = 0; dd < dim; ++dd) {
     volume *= h[dd];
   }
 
