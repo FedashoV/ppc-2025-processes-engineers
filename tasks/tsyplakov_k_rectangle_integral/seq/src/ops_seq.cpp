@@ -2,9 +2,9 @@
 
 #include <cmath>
 #include <vector>
+#include <cstddef>
 
 #include "tsyplakov_k_rectangle_integral/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace tsyplakov_k_rectangle_integral {
 
@@ -40,13 +40,15 @@ bool TsyplakovKRectangleIntegralSEQ::PreProcessingImpl() {
 bool TsyplakovKRectangleIntegralSEQ::RunImpl() {
   const auto &input = GetInput();
   const int steps = static_cast<int>(input.back());
-  const int dim = (input.size() - 1) / 2;
+  const size_t dim = (input.size() - 1) / 2;
 
-  std::vector<double> a(dim), b(dim), h(dim);
+  std::vector<double> a(dim);
+  std::vector<double> b(dim);
+  std::vector<double> h(dim);
 
   for (int i = 0; i < dim; ++i) {
-    a[i] = input[2 * i];
-    b[i] = input[2 * i + 1];
+    a[i] = input[static_cast<size_t>(2) * i];
+    b[i] = input[(static_cast<size_t>(2) * i) + 1];
     h[i] = (b[i] - a[i]) / steps;
   }
 
@@ -56,11 +58,11 @@ bool TsyplakovKRectangleIntegralSEQ::RunImpl() {
     int tmp = idx;
     double f_value = 0.0;
 
-    for (int d = 0; d < dim; ++d) {
+    for (int dd = 0; dd < dim; ++dd) {
       int coord = tmp % steps;
       tmp /= steps;
 
-      double x = a[d] + coord * h[d];
+      double x = a[dd] + (coord * h[dd]);
       f_value += x;
     }
 
@@ -68,8 +70,8 @@ bool TsyplakovKRectangleIntegralSEQ::RunImpl() {
   }
 
   double volume = 1.0;
-  for (int d = 0; d < dim; ++d) {
-    volume *= h[d];
+  for (int dd = 0; dd < dim; ++dd) {
+    volume *= h[dd];
   }
 
   GetOutput() *= volume;

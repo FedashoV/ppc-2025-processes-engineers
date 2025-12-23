@@ -8,7 +8,6 @@
 #include <vector>
 
 #include "tsyplakov_k_rectangle_integral/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace tsyplakov_k_rectangle_integral {
 
@@ -56,7 +55,7 @@ bool TsyplakovKRectangleIntegralMPI::RunImpl() {
 
   for (size_t i = 0; i < dim; ++i) {
     a[i] = input[static_cast<size_t>(2) * i];
-    b[i] = input[static_cast<size_t>(2) * i + 1];
+    b[i] = input[(static_cast<size_t>(2) * i) + 1];
     h[i] = (b[i] - a[i]) / steps;
   }
 
@@ -65,7 +64,7 @@ bool TsyplakovKRectangleIntegralMPI::RunImpl() {
   const int points_per_proc = total_points / size;
   const int remainder = total_points % size;
 
-  int start = rank * points_per_proc + std::min(rank, remainder);
+  int start = (rank * points_per_proc) + std::min(rank, remainder);
   int end = start + points_per_proc + (rank < remainder ? 1 : 0);
 
   double local_sum = 0.0;
@@ -74,11 +73,11 @@ bool TsyplakovKRectangleIntegralMPI::RunImpl() {
     int tmp = idx;
     double f_value = 0.0;
 
-    for (size_t d = 0; d < dim; ++d) {
+    for (size_t dd = 0; dd < dim; ++dd) {
       int coord = tmp % steps;
       tmp /= steps;
 
-      double x = a[d] + coord * h[d];
+      double x = a[dd] + (coord * h[dd]);
       f_value += x;
     }
 
@@ -92,8 +91,8 @@ bool TsyplakovKRectangleIntegralMPI::RunImpl() {
 
   if (rank == 0) {
     double volume = 1.0;
-    for (size_t d = 0; d < dim; ++d) {
-      volume *= h[d];
+    for (size_t dd = 0; dd < dim; ++dd) {
+      volume *= h[dd];
     }
     result = global_sum * volume;
   }

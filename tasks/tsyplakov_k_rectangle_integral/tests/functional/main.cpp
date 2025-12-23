@@ -4,16 +4,22 @@
 #include <cmath>
 #include <tuple>
 #include <vector>
+#include <string>
+#include <cstddef>
 
 #include "tsyplakov_k_rectangle_integral/common/include/common.hpp"
 #include "tsyplakov_k_rectangle_integral/mpi/include/ops_mpi.hpp"
 #include "tsyplakov_k_rectangle_integral/seq/include/ops_seq.hpp"
 #include "util/include/func_test_util.hpp"
+#include "util/include/util.hpp"
 
 namespace tsyplakov_k_rectangle_integral {
 
 class TsyplakovKRunFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
+
+  TsyplakovKRunFuncTests() = default;
+
   static std::string PrintTestParam(const TestType &param) {
     int steps = static_cast<int>(std::get<0>(param).back());
     return "steps_" + std::to_string(steps);
