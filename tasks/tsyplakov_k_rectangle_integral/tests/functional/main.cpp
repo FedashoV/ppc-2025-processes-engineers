@@ -2,10 +2,10 @@
 
 #include <array>
 #include <cmath>
+#include <cstddef>
+#include <string>
 #include <tuple>
 #include <vector>
-#include <string>
-#include <cstddef>
 
 #include "tsyplakov_k_rectangle_integral/common/include/common.hpp"
 #include "tsyplakov_k_rectangle_integral/mpi/include/ops_mpi.hpp"
@@ -17,7 +17,6 @@ namespace tsyplakov_k_rectangle_integral {
 
 class TsyplakovKRunFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
-
   TsyplakovKRunFuncTests() = default;
 
   static std::string PrintTestParam(const TestType &param) {

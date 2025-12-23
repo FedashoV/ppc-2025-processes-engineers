@@ -1,8 +1,8 @@
 #include "tsyplakov_k_rectangle_integral/seq/include/ops_seq.hpp"
 
 #include <cmath>
-#include <vector>
 #include <cstddef>
+#include <vector>
 
 #include "tsyplakov_k_rectangle_integral/common/include/common.hpp"
 
