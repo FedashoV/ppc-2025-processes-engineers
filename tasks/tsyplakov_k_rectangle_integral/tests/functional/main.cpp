@@ -5,11 +5,13 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <cstddef>
 
 #include "tsyplakov_k_rectangle_integral/common/include/common.hpp"
 #include "tsyplakov_k_rectangle_integral/mpi/include/ops_mpi.hpp"
 #include "tsyplakov_k_rectangle_integral/seq/include/ops_seq.hpp"
 #include "util/include/func_test_util.hpp"
+#include "util/include/util.hpp"
 
 namespace tsyplakov_k_rectangle_integral {
 
@@ -32,8 +34,8 @@ class TsyplakovKRunFuncTests : public ppc::util::BaseRunFuncTests<InType, OutTyp
   }
 
   bool CheckTestOutputData(OutType &output_data) override {
-    constexpr double eps = 3e-2;
-    return std::abs(output_data - expected_) < eps;
+    constexpr double kEps = 3e-2;
+    return std::abs(output_data - expected_) < kEps;
   }
 
  private:
