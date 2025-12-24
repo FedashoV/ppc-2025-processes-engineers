@@ -2,10 +2,10 @@
 
 #include <array>
 #include <cmath>
+#include <cstddef>
 #include <string>
 #include <tuple>
 #include <vector>
-#include <cstddef>
 
 #include "tsyplakov_k_rectangle_integral/common/include/common.hpp"
 #include "tsyplakov_k_rectangle_integral/mpi/include/ops_mpi.hpp"
